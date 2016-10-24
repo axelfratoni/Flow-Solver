@@ -9,7 +9,7 @@ public class Solution {
 
 	private static Mode mode;
 	private static int time;
-	// private static State initialState;
+	private static State initialState;
 
 	public static void main(String[] args) {
 		
@@ -22,7 +22,6 @@ public class Solution {
 		if (error != 0) {
 			return;
 		}
-
 
 		// Start solving
 	}
@@ -119,6 +118,7 @@ public class Solution {
 			// Read board
 			
 			Map<Integer, Integer> checkMap = new HashMap<>();	// Para chequear que para cada color haya dos puntos o ninguno
+			initialState = new ByteState(rows, cols);
 			for (int i = 0; i < rows; i++) {
 				line = myReader.readLine();
 				if (line == null) {
@@ -137,9 +137,9 @@ public class Solution {
 						return 11;
 					}
 					if (c == ' ') {
-						// Aglo para indicar tablero vacío
+						initialState.setDot(-1, i, j);
 					} else {
-						// Algo para indicar que hay un punto
+						initialState.setDot((int) c, i, j);
 						if (checkMap.containsKey((int) c)) {
 							checkMap.put((int) c, checkMap.get((int) c) + 1);
 						} else {
