@@ -4,7 +4,7 @@ import java.util.Set;
 
 interface State {
 	
-	Set<State> nextStates();
+	Set<State> getNextStates();
 	
 	// color = -1 means empty square
 	void setDot(int color, int i, int j);

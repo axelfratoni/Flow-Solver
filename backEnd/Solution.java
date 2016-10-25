@@ -1,15 +1,19 @@
 package backEnd;
 
 import java.io.*;
+import java.util.Set;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.StringTokenizer;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.LinkedList;
 
 public class Solution {
 
 	private static Mode mode;
 	private static int time;
-	private static State initialState;
+	private static ByteState initialState;
 
 	public static void main(String[] args) {
 		
@@ -23,7 +27,28 @@ public class Solution {
 			return;
 		}
 
-		// Start solving
+		initialState.printBoard();
+		Set<State> seenStates = new HashSet<>();
+		Deque<State> nextStates = new LinkedList<>();
+		seenStates.add(initialState);
+		nextStates.offer(initialState);
+		boolean foundSolution = false;
+		while(!nextStates.isEmpty() && !foundSolution) {
+			for (State current: nextStates.poll().getNextStates()) {
+				if (!foundSolution) {
+					if (current.isSolution() != -1) {
+						foundSolution = true;
+						((ByteState)current).printBoard();
+					} else {
+						if (!seenStates.contains(current)) {
+							nextStates.offer(current);
+							seenStates.add(current);
+							((ByteState)current).printBoard();
+						}
+					}
+				}
+			}
+		}
 	}
 	
 	private static int readParameters(String[] args) {

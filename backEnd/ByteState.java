@@ -12,14 +12,19 @@ class ByteState implements State {
 
 	private static byte BINARY_DOT = 0b00001111;
 
+	private int emptySquares, inconexDots;
 	private byte[][] board;
 	
 	ByteState(int i, int j) {
 		board = new byte[i][j];
+		inconexDots = 0;
+		emptySquares = i*j;
 	}
 
-	private ByteState(byte[][] copy) {
+	private ByteState(byte[][] copy, int inconexDots, int emptySquares) {
 		this.board = copy;
+		this.inconexDots = inconexDots;
+		this.emptySquares = emptySquares;
 	}
 	
 	public void setDot(int color, int i, int j) {
@@ -28,17 +33,19 @@ class ByteState implements State {
 		}
 		else {
 			board[i][j] = (byte) ((color << 4) | 0xF);
+			inconexDots++;
+			emptySquares--;
 		}
 	}
 
-	public Set<State> nextStates() {
+	public Set<State> getNextStates() {
 		Set<State> result = new HashSet<>();
 		for (int i = 0; i < board.length; i++) {
 			for (int j = 0; j < board[0].length; j++) {
-				addNextStates(i, j, 0, -1, BINARY_UP, BINARY_DOWN, result);
-				addNextStates(i, j, 0, 1, BINARY_DOWN, BINARY_UP, result);
-				addNextStates(i, j, -1, 0, BINARY_LEFT, BINARY_RIGHT, result);
-				addNextStates(i, j, 1, 0, BINARY_RIGHT, BINARY_LEFT, result);
+				addNextStates(i, j, -1, 0, BINARY_UP, BINARY_DOWN, result);
+				addNextStates(i, j, 1, 0, BINARY_DOWN, BINARY_UP, result);
+				addNextStates(i, j, 0, -1, BINARY_LEFT, BINARY_RIGHT, result);
+				addNextStates(i, j, 0, 1, BINARY_RIGHT, BINARY_LEFT, result);
 			}
 		}
 		return result;
@@ -48,30 +55,31 @@ class ByteState implements State {
 		if (isInRange(x+i, y+j) && ((board[x][y] & 0x0F) == BINARY_DOT || (lowerBitsOn(board[x][y]) == 1 && (board[x][y]^mask) != 0))) {	// It's a non-connected dot or a non-maskwards line
 			if ((board[x+i][y+j] & 0x0F) == 0) {	// Masker square is empty
 				byte[][] newBoard = new byte[board.length][];
-				for (int k = 0; k < board.length; j++) {
+				for (int k = 0; k < board.length; k++) {
 					newBoard[k] = board[k].clone();
 				}
-				newBoard[x][y] = (byte) ((newBoard[x][y] & 0xF0) + ((newBoard[x][y] | 0xF0)^mask));
-				newBoard[x+i][y+j] = (opposite_mask);
-				result.add(new ByteState(newBoard));
+				//newBoard[x][y] = (byte) ((newBoard[x][y] & 0xF0) + ((newBoard[x][y] | 0xF0)^mask));
+				newBoard[x][y] ^= mask;
+				newBoard[x+i][y+j] = (byte) ((opposite_mask) + (newBoard[x][y] & 0xF0));
+				result.add(new ByteState(newBoard, inconexDots, emptySquares - 1));
 			} else if (board[x+i][y+j] >> 4 == board[x][y] >> 4) {	// Masker square has same color
 				int lb = lowerBitsOn(board[x+i][y+j]);
 				if (lb == 4) {			// Masker square has a dot and it's not connected
 					byte[][] newBoard = new byte[board.length][];
-					for (int k = 0; k < board.length; j++) {
+					for (int k = 0; k < board.length; k++) {
 						newBoard[k] = board[k].clone();
 					}
-					newBoard[x][y] = (byte) ((newBoard[x][y] & 0xF0) + ((newBoard[x][y] | 0xF0)^mask));	// Add mask-line to current dot
-					newBoard[x+i][y+j] = (byte) ((newBoard[x+i][y+j] & 0xF0) + ((newBoard[x+i][y+j] | 0xF0)^opposite_mask));	// Add opposite_mask-line to upper dot
-					result.add(new ByteState(newBoard));
+					newBoard[x][y] ^= mask;	// Add mask-line to current dot
+					newBoard[x+i][y+j] ^= opposite_mask;	// Add opposite_mask-line to upper dot
+					result.add(new ByteState(newBoard, inconexDots - 2, emptySquares));
 				} else if (lb == 1) {	// Masker square has a one-way line
 					byte[][] newBoard = new byte[board.length][];
-					for (int k = 0; k < board.length; j++) {
+					for (int k = 0; k < board.length; k++) {
 						newBoard[k] = board[k].clone();
 					}
-					newBoard[x][y] = (byte) ((newBoard[x][y] & 0xF0) + ((newBoard[x][y] | 0xF0)^mask));	// Add mask-line to current dot
-					newBoard[x+i][y+j] = (byte) ((newBoard[x+i][y+j] & 0xF0) + ((newBoard[x+i][y+j] | 0xF0)^opposite_mask));	// Add opposite_mask-line to upper dot
-					result.add(new ByteState(newBoard));
+					newBoard[x][y] ^= mask;	// Add mask-line to current dot
+					newBoard[x+i][y+j] ^= opposite_mask;	// Add opposite_mask-line to upper dot
+					result.add(new ByteState(newBoard, inconexDots - 2, emptySquares));
 				}
 			}
 		}
@@ -121,11 +129,11 @@ class ByteState implements State {
 									info[i][j].dir2 = Direction.LEFT;
 									break;
 								default:
-									throw new AssertionError();
+									throw new AssertionError("Error 1");
 							}
 						case 3:
 							info[i][j].elem = Element.DOT;
-							switch(board[i][j]) {
+							switch(board[i][j] & 0x0F) {
 								case 0b1110:
 									info[i][j].dir1 = Direction.UP;
 									break;
@@ -139,7 +147,7 @@ class ByteState implements State {
 									info[i][j].dir1 = Direction.LEFT;
 									break;
 								default:
-									throw new AssertionError();
+									throw new AssertionError("Error 2");
 							}
 							info[i][j].dir2 = null;
 						break;
@@ -149,7 +157,7 @@ class ByteState implements State {
 							info[i][j].dir2 = null;
 							break;
 						default:
-							throw new AssertionError();
+							throw new AssertionError("Error 3");
 					}
 				}
 			}
@@ -158,7 +166,13 @@ class ByteState implements State {
 	}
 
 	public int isSolution() {
-		return -1;
+		if (inconexDots > 0) {
+			return -1;
+		} else if (inconexDots == 0) {
+			return emptySquares;
+		} else {
+			throw new AssertionError("Error4");
+		}
 	}
 
 	private Direction getOneLineDirection(byte oneLine) {
@@ -188,5 +202,57 @@ class ByteState implements State {
 
 	private boolean isInRange(int i, int j) {
 		return (i >= 0 && j >= 0 && i < board.length && j < board[0].length);
+	}
+
+	public int hashCode() {
+		int result = 0;
+		for (int i = 0; i < board.length; i++) {
+			for (int j = 0; j < board[0].length; j++) {
+				result ^= (board[i][j] << (i % 4));
+			}
+		}
+		return result;
+	}
+
+	public boolean equals(Object o) {
+		if (this == o) 
+			return true;
+		return (o instanceof ByteState && hasSameBoard(((ByteState) o).board));
+	}
+
+	private boolean hasSameBoard(byte[][] otherBoard) {
+		if (board.length != otherBoard.length || board[0].length != otherBoard[0].length)
+			return false;
+		for (int i = 0; i < board.length; i++) {
+			for (int j = 0; j < board[0].length; j++) {
+				if (board[i][j] != otherBoard[i][j]) 
+					return false;
+			}
+		}
+		return true;
+	}
+
+	public void printBoard() {
+		/*
+		Square[][] info = getInfo();
+		for (int i = 0; i < info.length; i++) {
+			for (int j = 0; j < info[0].length; j++) {
+				if (info[i][j] == null) {
+					System.out.print("0");
+				} else {
+					System.out.print(info[i][j].color);
+				}
+			}
+			System.out.println();
+		}
+		*/
+
+		for (int i = 0; i < board.length; i++) {
+			for (int j = 0; j < board[0].length; j++) {
+				System.out.print(board[i][j] + " ");
+			}
+			System.out.println();
+		}
+		System.out.println();
 	}
 }
