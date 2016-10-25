@@ -1,10 +1,10 @@
 package backEnd;
 
-import java.util.*;
+import java.util.Set;
 
-public interface State {
+interface State {
 	
-	Deque<State> nextStates();
+	Set<State> nextStates();
 	
 	// color = -1 means empty square
 	void setDot(int color, int i, int j);
