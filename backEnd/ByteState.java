@@ -234,19 +234,6 @@ class ByteState implements State {
 
 	public void printBoard() {
 		/*
-		Square[][] info = getInfo();
-		for (int i = 0; i < info.length; i++) {
-			for (int j = 0; j < info[0].length; j++) {
-				if (info[i][j] == null) {
-					System.out.print("0");
-				} else {
-					System.out.print(info[i][j].color);
-				}
-			}
-			System.out.println();
-		}
-		*/
-
 		for (int i = 0; i < board.length; i++) {
 			for (int j = 0; j < board[0].length; j++) {
 				System.out.print(board[i][j] + " ");
@@ -254,5 +241,41 @@ class ByteState implements State {
 			System.out.println();
 		}
 		System.out.println();
+		*/
+
+		for (int i = 0; i < board.length; i++) {
+			for (int j = 0; j < board[0].length; j++) {
+				if (board[i][j] == 0) {
+					System.out.print(" ");
+				} else if ((board[i][j] & 0x0F) == BINARY_DOT || lowerBitsOn(board[i][j]) == 3) {
+					System.out.print(board[i][j] >> 4);
+				} else if ((board[i][j] & 0x0F) == BINARY_UP) {
+					System.out.print("'");
+				} else if ((board[i][j] & 0x0F) == BINARY_DOWN) {
+					System.out.print(",");
+				} else if ((board[i][j] & 0x0F) == BINARY_LEFT) {
+					System.out.print(">");
+				} else if ((board[i][j] & 0x0F) == BINARY_RIGHT) {
+					System.out.print("<");
+				} else if ((board[i][j] & 0x0F) == (BINARY_DOWN^BINARY_LEFT)) {
+					System.out.print("┐");
+				} else if ((board[i][j] & 0x0F) == (BINARY_DOWN^BINARY_RIGHT)) {
+					System.out.print("┌");
+				} else if ((board[i][j] & 0x0F) == (BINARY_UP^BINARY_LEFT)) {
+					System.out.print("┘");
+				} else if ((board[i][j] & 0x0F) == (BINARY_UP^BINARY_RIGHT)) {
+					System.out.print("└");
+				} else if ((board[i][j] & 0x0F) == (BINARY_UP^BINARY_DOWN)) {
+					System.out.print("|");
+				} else if ((board[i][j] & 0x0F) == (BINARY_LEFT^BINARY_RIGHT)) {
+					System.out.print("—");
+				} else {
+					throw new AssertionError();
+				}
+			}
+			System.out.println();
+		}
+		System.out.println();
 	}
+
 }
