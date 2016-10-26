@@ -10,6 +10,9 @@ public class SquareState implements State {
 	
 	private Square[][] board;
 	private int incompletePaths, emptySpaces;
+	private int index;
+	
+	
 	
 	public SquareState(int width, int length){
 		board = new Square[width][length];
@@ -19,7 +22,7 @@ public class SquareState implements State {
 				sq.elem = null;
 				sq.dir1 = null;
 				sq.dir2 = null;
-				sq.color = 0;
+				sq.color = -1;
 				board[i][j] = sq;
 			}
 		}
@@ -41,9 +44,6 @@ public class SquareState implements State {
 				}
 			}
 		}
-		System.out.println();
-		System.out.println("Hola ");
-		System.out.println(states.toString());
 		return states;
 	}
 
@@ -176,16 +176,38 @@ public class SquareState implements State {
 	}
 	
 	private boolean isViable(int i, int j, int y, int x) {
-		boolean spotIsNull = board[i][j].elem == null;
-		if (!spotIsNull){
-			if(board[x][y].color != board[i][j].color){
-				return false;
+		if(spotIsAvailable(i,j,y,x)){
+			int acum = 0;
+			if (isInRange(i+1,j) && spotIsAvailable(i+1,j,y,x)){
+				acum+=1;
 			}
-			boolean spotIsDotWithoutDir1 = (board[i][j].elem == DOT  && board[i][j].dir1 == null);
-			boolean spotIsLineWithoutDir2 = (board[i][j].elem == LINE && board[i][j].dir2 == null);
-			return (spotIsDotWithoutDir1 || spotIsLineWithoutDir2);
+			if (isInRange(i-1,j) && spotIsAvailable(i-1,j,y,x)){
+				acum+=1;
+			}
+			if (isInRange(i,j+1) && spotIsAvailable(i,j+1,y,x)){
+				acum+=1;
+			}
+			if (isInRange(i,j-1) && spotIsAvailable(i,j-1,y,x)){
+				acum+=1;
+			}
+			if(!(board[i][j].elem == DOT && board[y][x].elem == DOT)){
+				acum--;
+			}
+			return acum!=0;
 		}
-		return true;
+		return false;
+	}
+	
+	private boolean spotIsAvailable(int i, int j, int y, int x) {
+		return  board[i][j].elem == null || ((board[i][j].color == board[y][x].color) && (spotIsDotWithoutDir1(i,j) || spotIsLineWithoutDir2(i,j)));
+	}
+
+	private boolean spotIsLineWithoutDir2(int i, int j){
+		return (board[i][j].elem == LINE && board[i][j].dir2 == null);
+	}
+	
+	private boolean spotIsDotWithoutDir1(int i, int j){
+		return (board[i][j].elem == DOT  && board[i][j].dir1 == null);
 	}
 	
 	private boolean isInRange(int i, int j) {
@@ -319,6 +341,8 @@ public class SquareState implements State {
 		}
 	}
 	private String dirToString(Direction dir){
+		if(dir == null)
+			return "null";
 		switch(dir){
 			case UP:
 				return "U";
@@ -331,5 +355,6 @@ public class SquareState implements State {
 		}
 		return null;
 	}
+	
 	
 }
