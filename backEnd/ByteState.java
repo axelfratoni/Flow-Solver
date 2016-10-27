@@ -2,6 +2,7 @@ package backEnd;
 
 import java.util.Set;
 import java.util.HashSet;
+import java.io.*;
 
 class ByteState implements State {
 	
@@ -242,7 +243,7 @@ class ByteState implements State {
 		}
 		System.out.println();
 		*/
-
+		
 		for (int i = 0; i < board.length; i++) {
 			for (int j = 0; j < board[0].length; j++) {
 				if (board[i][j] == 0) {
