@@ -56,21 +56,21 @@ public class NewSquareState implements State {
 	@Override
 	public Set<State> getNextStates() {
 		Set<State> paths = new HashSet<State>();
-		Set<State> nextStates = new HashSet<State>();
 		paths.addAll(getFirstPathStates(colors.get(index).y,colors.get(index).x,board));
-		for(State s: paths){
-			if(!((NewSquareState)s).hasBlockedPaths()){
-				nextStates.add(s);
-			}
-		}
-		System.out.println(nextStates);
-		return nextStates;
+//		System.out.println(nextStates);
+		return paths;
 	}
 
 
 	private Set<State> getFirstPathStates(int i, int j,Square[][] currentBoard) {
 		Set<State> state = new HashSet<>();
 		int c = connects(i,j,currentBoard);
+		if(imNextToSomething(currentBoard,i,j)){
+			NewSquareState nss = new NewSquareState(currentBoard, incompletePaths - 2, 10, index+1 ,colors);
+			if(nss.hasBlockedPaths() && !hasOtherPaths(currentBoard)){
+				return state;
+			}
+		}
 		if (c != 0){
 			Square[][] newBoard = copyBoard(currentBoard);
 			switch(c){
@@ -91,7 +91,11 @@ public class NewSquareState implements State {
 					newBoard[i][j-1].dir1 = RIGHT;
 					break;
 			}
-			state.add(new NewSquareState(newBoard, incompletePaths - 2, 10, index+1 ,colors));
+			NewSquareState nss = new NewSquareState(newBoard, incompletePaths - 2, 10, index+1 ,colors);
+			if(nss.hasBlockedPaths() && !hasOtherPaths(newBoard)){
+				return state;
+			}
+			state.add(nss);
 			
 		}
 		
@@ -130,6 +134,34 @@ public class NewSquareState implements State {
 		return state;
 	}
 	
+	
+	
+	
+	private boolean imNextToSomething(Square[][] currentBoard, int i, int j) {
+		if((isInRange(i+1,j) && currentBoard[i+1][j].elem != null && !comingFromLeftOrRight(currentBoard,i,j) ) || (!isInRange(i+1,j) && !comingFromLeftOrRight(currentBoard,i,j))){
+			return true;
+		}
+		if((isInRange(i-1,j) && currentBoard[i-1][j].elem != null && !comingFromLeftOrRight(currentBoard,i,j)) || (!isInRange(i-1,j) && !comingFromLeftOrRight(currentBoard,i,j))){
+			return true;
+		}
+		if((isInRange(i,j+1) && currentBoard[i][j+1].elem != null && !comingFromUpOrDown(currentBoard,i,j))|| (!isInRange(i,j+1) && !comingFromUpOrDown(currentBoard,i,j))){
+			return true;
+		}
+		if((isInRange(i,j-1) && currentBoard[i][j-1].elem != null && !comingFromUpOrDown(currentBoard,i,j))|| (!isInRange(i,j-1) && !comingFromUpOrDown(currentBoard,i,j))){
+			return true;
+		}
+		return false;
+	}
+	
+	private boolean comingFromLeftOrRight(Square[][] currentBoard, int i, int j){
+		return (isInRange(i,j+1) && (currentBoard[i][j+1].elem != null && currentBoard[i][j+1].color == index) ) || (isInRange(i,j-1) && currentBoard[i][j-1].elem != null && currentBoard[i][j-1].color == index);
+	}
+	
+	private boolean comingFromUpOrDown(Square[][] currentBoard, int i, int j){
+		return ((!isInRange(i,j+1) && ((isInRange(i+1,j) && currentBoard[i+1][j].elem != null && currentBoard[i+1][j].color == index ) || (isInRange(i-1,j) && currentBoard[i-1][j].elem != null && currentBoard[i-1][j].color == index))));
+	}
+	
+	
 	private void decideWhich(Square sq, Direction dir) {
 		if(sq.elem == DOT)
 			sq.dir1 = dir;
@@ -158,12 +190,12 @@ public class NewSquareState implements State {
 	private boolean hasBlockedPaths() {
 		Iterator<Entry<Integer,Point>> it = colors.entrySet().iterator();
 		
+		boolean pathAvailable = true;
 		while(it.hasNext()){
 			Entry<Integer,Point> en = it.next();
 			Integer i = en.getKey();
 			Point p = en.getValue();
-			if( i > index){
-				boolean pathAvailable = false;
+			if( i >= index){
 				byte[][] miniBoard = createMiniBoard(i);
 				pathAvailable = checkIfThereIsAPath(miniBoard, p.y, p.x, true);
 				if (!pathAvailable){
@@ -173,6 +205,38 @@ public class NewSquareState implements State {
 		}
 		return false;
 	}
+	
+	private boolean hasOtherPaths(Square[][] currentBoard){
+		Point p = colors.get(index);
+		byte[][] miniBoard = createSpecialMiniBoard(currentBoard);
+		return checkIfThereIsAPath(miniBoard,p.y,p.x,true);
+	}
+	
+	
+	private byte[][] createSpecialMiniBoard(Square[][] currentBoard) {
+		byte[][] miniBoard = new byte[currentBoard.length][currentBoard[0].length];
+		for(int i = 0; i < currentBoard.length ; i++){
+			for(int j = 0; j < currentBoard[0].length; j++){
+				if(currentBoard[i][j].elem == null){
+					miniBoard[i][j] = 1;
+				} else if(currentBoard[i][j].elem == DOT && currentBoard[i][j].color == i){
+					miniBoard[i][j] = 2;
+				} else if(currentBoard[i][j].elem == LINE){
+					miniBoard[i][j] = 0;
+				}
+			}
+		}
+		return miniBoard;
+	}
+
+//	private void printMiniBoard(byte[][] miniBoard) {
+//		for(int i = 0; i < board.length ; i++){
+//			for(int j = 0; j < board[0].length; j++){
+//				System.out.print(miniBoard[i][j]);
+//			}
+//			System.out.println();
+//		}
+//	}
 
 	private boolean checkIfThereIsAPath(byte[][] miniBoard, int i, int j, boolean isTheFirstCall) {
 		if(miniBoard[i][j] == 0){
@@ -226,7 +290,7 @@ public class NewSquareState implements State {
 			if(color < index)
 				this.index = color;
 			if(!colors.containsKey(color )){
-				colors.put(color,new Point(i,j));
+				colors.put(color,new Point(j,i));
 			}
 			board[i][j].elem = DOT;
 			board[i][j].color = color;
