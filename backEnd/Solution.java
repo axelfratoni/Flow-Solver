@@ -33,8 +33,11 @@ public class Solution {
 		seenStates.add(initialState);
 		nextStates.offer(initialState);
 		boolean foundSolution = false;
+		long t = System.currentTimeMillis();
 		while(!nextStates.isEmpty() && !foundSolution) {
-			for (State current: nextStates.poll().getNextStates()) {
+			State thisState = nextStates.poll();
+			if (thisState.getNextStates() == null) continue;
+			for (State current: thisState.getNextStates()) {
 				if (!foundSolution) {
 					if (current.isSolution() != -1) {
 						foundSolution = true;
@@ -49,6 +52,7 @@ public class Solution {
 				}
 			}
 		}
+		System.out.println("Time elapsed: " + (System.currentTimeMillis() - t)/1000.0 + " seconds");
 	}
 	
 	private static int readParameters(String[] args) {
