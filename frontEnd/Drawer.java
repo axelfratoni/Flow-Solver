@@ -20,7 +20,7 @@ public class Drawer  {
 		board= new Pane();
 		board.setPrefSize(Dimensions.BOARD_HEIGHT, Dimensions.BOARD_WIDTH);
 		stage.setScene(new Scene(board));
-		stage.show();
+
 	}
 	
 	@Deprecated
@@ -64,16 +64,15 @@ public class Drawer  {
 		}
 		for(int i=0; i< matrix.length; i++){
 			for(int j=0; j<matrix[0].length; j++){
-					Canvas canvas= canvasMatrix[i][j];
-					board.getChildren().remove(canvas);
-						canvas= new Canvas(offset,offset);
-						drawIamge(canvas,matrix[i][j]);
-						canvas.setTranslateX(j*offset);
-						canvas.setTranslateY(i*offset);
-						board.getChildren().add(canvas);
-						
+					board.getChildren().remove(canvasMatrix[i][j]);
+					canvasMatrix[i][j]= new Canvas(offset,offset);
+					drawIamge(canvasMatrix[i][j],matrix[i][j]);
+					canvasMatrix[i][j].setTranslateX(j*offset);
+					canvasMatrix[i][j].setTranslateY(i*offset);
+					board.getChildren().add(canvasMatrix[i][j]);
 			}
 		}
+		stage.show();
 	}
 	
 	public static void drawIamge(Canvas canvas, Square square){
@@ -82,7 +81,7 @@ public class Drawer  {
 			return;
 		}
 		
-		String name="/assets/";
+		String name="Assets/";
 		int rotate=0;
 		String colors[]= new String[]{"Pink","Green","Blue","Purple","Red","Orange","Yellow","Black","LightBlue","Grey"};
 		

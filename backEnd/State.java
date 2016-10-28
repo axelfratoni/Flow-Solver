@@ -2,7 +2,7 @@ package backEnd;
 
 import java.util.Set;
 
-interface State {
+public interface State {
 	
 	Set<State> getNextStates();
 	
@@ -13,4 +13,6 @@ interface State {
 	int isSolution();
 	
 	Square[][] getInfo();
+
+	void printBoard();
 }

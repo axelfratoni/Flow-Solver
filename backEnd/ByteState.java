@@ -4,7 +4,7 @@ import java.util.Set;
 import java.util.HashSet;
 import java.io.*;
 
-class ByteState implements State {
+public class ByteState implements State {
 	
 	private static byte BINARY_UP = 0b00000001;
 	private static byte BINARY_RIGHT = 0b00000010;
@@ -16,7 +16,7 @@ class ByteState implements State {
 	private int emptySquares, inconexDots;
 	private byte[][] board;
 	
-	ByteState(int i, int j) {
+	public ByteState(int i, int j) {
 		board = new byte[i][j];
 		inconexDots = 0;
 		emptySquares = i*j;
