@@ -64,12 +64,12 @@ public class Drawer  {
 		}
 		for(int i=0; i< matrix.length; i++){
 			for(int j=0; j<matrix[0].length; j++){
-					board.getChildren().remove(canvasMatrix[i][j]);
-					canvasMatrix[i][j]= new Canvas(offset,offset);
-					drawIamge(canvasMatrix[i][j],matrix[i][j]);
-					canvasMatrix[i][j].setTranslateX(j*offset);
-					canvasMatrix[i][j].setTranslateY(i*offset);
-					board.getChildren().add(canvasMatrix[i][j]);
+				board.getChildren().remove(canvasMatrix[i][j]);
+				canvasMatrix[i][j]= new Canvas(offset,offset);
+				drawIamge(canvasMatrix[i][j],matrix[i][j]);
+				canvasMatrix[i][j].setTranslateX(j*offset);
+				canvasMatrix[i][j].setTranslateY(i*offset);
+				board.getChildren().add(canvasMatrix[i][j]);
 			}
 		}
 		stage.show();

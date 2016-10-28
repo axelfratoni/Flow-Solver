@@ -39,36 +39,6 @@ public class Flow extends Application {
 		Solver solver = new Solver(initialState, drawer);
 		solver.solve(mode);
 
-		/*
-		initialState.printBoard();
-		drawer.update(initialState.getInfo());
-		Set<State> seenStates = new HashSet<>();
-		Deque<State> nextStates = new LinkedList<>();
-		seenStates.add(initialState);
-		nextStates.offer(initialState);
-		boolean foundSolution = false;
-		long t = System.currentTimeMillis();
-		while(!nextStates.isEmpty() && !foundSolution) {
-			State thisState = nextStates.poll();
-			if (thisState.getNextStates() == null) continue;
-			for (State current: thisState.getNextStates()) {
-				if (!foundSolution) {
-					if (current.isSolution() != -1) {
-						foundSolution = true;
-						((ByteState)current).printBoard();
-						drawer.update(current.getInfo());
-					} else {
-						if (!seenStates.contains(current)) {
-							nextStates.offer(current);
-							seenStates.add(current);
-							((ByteState)current).printBoard();
-						}
-					}
-				}
-			}
-		}
-		System.out.println("Time elapsed: " + (System.currentTimeMillis() - t)/1000.0 + " seconds");
-		*/
 	}
 	
 	private static int readParameters(String[] args) {
