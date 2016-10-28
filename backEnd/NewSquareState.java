@@ -14,7 +14,7 @@ import java.util.Set;
 
 public class NewSquareState implements State {
 	private Square[][] board;
-	private int incompletePaths, emptySpaces;
+	private int incompletePaths;
 	private Map<Integer,Point> colors;
 	private int index;
 	
@@ -36,11 +36,10 @@ public class NewSquareState implements State {
 		}
 	}
 	
-	public NewSquareState(Square[][] board, int incompletePaths, int emptySpaces,int nextIndex, Map<Integer,Point> colors){
+	public NewSquareState(Square[][] board, int incompletePaths,int nextIndex, Map<Integer,Point> colors){
 		contador++;
 		this.board = board;
 		this.incompletePaths = incompletePaths;
-		this.emptySpaces = emptySpaces;
 		
 		while(!colors.containsKey(nextIndex)){
 			nextIndex++;
@@ -66,7 +65,7 @@ public class NewSquareState implements State {
 		Set<State> state = new HashSet<>();
 		int c = connects(i,j,currentBoard);
 		if(imNextToSomething(currentBoard,i,j)){
-			NewSquareState nss = new NewSquareState(currentBoard, incompletePaths - 2, 10, index+1 ,colors);
+			NewSquareState nss = new NewSquareState(currentBoard, incompletePaths - 2, index+1 ,colors);
 			if(nss.hasBlockedPaths() && !hasOtherPaths(currentBoard)){
 				return state;
 			}
@@ -91,7 +90,7 @@ public class NewSquareState implements State {
 					newBoard[i][j-1].dir1 = RIGHT;
 					break;
 			}
-			NewSquareState nss = new NewSquareState(newBoard, incompletePaths - 2, 10, index+1 ,colors);
+			NewSquareState nss = new NewSquareState(newBoard, incompletePaths - 2, index+1 ,colors);
 			if(nss.hasBlockedPaths() && !hasOtherPaths(newBoard)){
 				return state;
 			}
@@ -284,7 +283,6 @@ public class NewSquareState implements State {
 	
 	public void setDot(int color, int i, int j) {
 		if (color == -1){
-			emptySpaces++;
 		} else {
 			color = color - '0';
 			if(color < index)
@@ -300,10 +298,21 @@ public class NewSquareState implements State {
 
 	@Override
 	public int isSolution() {
-		return (incompletePaths > 0)? -1 : emptySpaces;
+		return (incompletePaths > 0)? -1 : emptySpaces();
 	}
 
 	
+	private int emptySpaces() {
+		int acum = 0;
+		for(int i = 0; i < board.length ; i++){
+			for(int j = 0; j < board[0].length; j++){
+				if(board[i][j].elem == null)
+					acum++;
+			}
+		}
+		return acum;
+	}
+
 	private Square[][] copyBoard(Square[][] boardToCopy) {
 		Square[][] newBoard = new Square[boardToCopy.length][boardToCopy[0].length];
 		for(int i = 0; i < boardToCopy.length; i++){
@@ -359,7 +368,7 @@ public class NewSquareState implements State {
 	}
 
 	public void printBoard(){
-		System.out.println("EmptySpaces: "+ emptySpaces + " IncompletePaths: " + incompletePaths/2 + " isSolution: " + isSolution());
+		System.out.println("EmptySpaces: - " + " IncompletePaths: " + incompletePaths/2 + " isSolution: " + isSolution());
 		System.out.println("Printing board:");
 		for(int i = 0; i < board.length ; i++){
 			for(int j = 0; j < board[0].length; j++){
