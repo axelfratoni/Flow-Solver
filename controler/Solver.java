@@ -51,7 +51,7 @@ public class Solver {
 				}
 			}
 		}
-		if (solvedState == null) {
+		if (solvedState != null) {
 			drawer.update(solvedState.getInfo());
 		}
 		System.out.println("Time elapsed: " + (System.currentTimeMillis() - t)/1000.0 + " seconds");

@@ -2,7 +2,6 @@ package backEnd;
 
 import java.util.Set;
 import java.util.HashSet;
-import java.io.*;
 
 public class ByteState implements State {
 	
