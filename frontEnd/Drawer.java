@@ -77,13 +77,13 @@ public class Drawer  {
 	
 	public static void drawIamge(Canvas canvas, Square square){
 		
-		if(square == null){
+		if(square == null || square.elem == null) {
 			return;
 		}
 		
 		String name="Assets/";
 		int rotate=0;
-		String colors[]= new String[]{"Pink","Green","Blue","Purple","Red","Orange","Yellow","Black","LightBlue","Grey"};
+		String colors[]= {"Pink","Green","Blue","Purple","Red","Orange","Yellow","Black","LightBlue","Grey"};
 		
 		
 		name+=colors[square.color];
@@ -102,7 +102,7 @@ public class Drawer  {
 				}
 			}
 		}else if (square.elem==Element.LINE){
-			if(square.dir1==Direction.LEFT && square.dir2==Direction.RIGHT){
+			if((square.dir1==Direction.LEFT && square.dir2==Direction.RIGHT) || (square.dir1==Direction.RIGHT && square.dir2==Direction.LEFT)){
 				rotate=90;
 				name+="Line";
 			}else if(square.dir1==Direction.UP && square.dir2==Direction.DOWN ||(square.dir1==Direction.DOWN && square.dir2==Direction.UP ) ){
@@ -132,12 +132,15 @@ public class Drawer  {
 			}else if(square.dir1==Direction.LEFT && square.dir2==null || square.dir1==null && square.dir2==Direction.LEFT){
 				rotate=270;
 				name+="Stick";
+			} else {
+				System.err.println("Oh oh! Algo salio mal");	
 			}
 			
 		}else{
 			System.err.println("Oh oh! Algo salio mal");
 		}
 		name+=".png";
+		
 		canvas.getGraphicsContext2D().drawImage(new Image(name), 0 , 0 ,canvas.getHeight(),canvas.getWidth());
 		canvas.setRotate(rotate);
 		return;

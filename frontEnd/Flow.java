@@ -14,7 +14,7 @@ public class Flow extends Application {
 
 	private static Mode mode;
 	private static int time;
-	private static ByteState initialState;
+	private static State initialState;
 
 	public static void main(String[] args) {
 		launch(args);
@@ -27,10 +27,12 @@ public class Flow extends Application {
 		error = readParameters(args);
 		if (error != 0) {
 			primaryStage.close();
+			System.exit(1);
 		}
 		error = readInput(args[0]);
 		if (error != 0) {
 			primaryStage.close();
+			System.exit(1);
 		}
 		
 		Drawer drawer = new Drawer(primaryStage,initialState.getInfo());
@@ -161,7 +163,7 @@ public class Flow extends Application {
 			// Read board
 			
 			Map<Integer, Integer> checkMap = new HashMap<>();	// Para chequear que para cada color haya dos puntos o ninguno
-			initialState = new ByteState(rows, cols);
+			initialState = new NewSquareState(rows, cols);
 			for (int i = 0; i < rows; i++) {
 				line = myReader.readLine();
 				if (line == null) {

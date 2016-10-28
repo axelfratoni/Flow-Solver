@@ -39,13 +39,13 @@ public class Solver {
 						if (thisSolution == 0) {
 							foundSolution = true;
 						}
-						current.printBoard();
+						//current.printBoard();
 						drawer.update(solvedState.getInfo());			
 					} else {
 						if (!seenStates.contains(current)) {
 							nextStates.offer(current);
 							seenStates.add(current);
-							current.printBoard();
+							//current.printBoard();
 						}
 					}
 				}
