@@ -5,17 +5,27 @@ import java.util.Set;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.StringTokenizer;
+
+import javafx.application.Application;
+import javafx.stage.Stage;
+import frontEnd.Drawer;
+
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.LinkedList;
 
-public class Solution {
+public class Solution extends Application {
 
 	private static Mode mode;
 	private static int time;
 	private static ByteState initialState;
 
 	public static void main(String[] args) {
+		launch(args);
+	}
+	
+	public void start(Stage primaryStage) throws Exception {
+		String[] args= this.getParameters().getRaw().toArray(new String[1]);
 		
 		int error;
 		error = readParameters(args);
@@ -26,8 +36,10 @@ public class Solution {
 		if (error != 0) {
 			return;
 		}
-
+		
+		Drawer drawer = new Drawer(primaryStage,initialState.getInfo());
 		initialState.printBoard();
+		drawer.update(initialState.getInfo());
 		Set<State> seenStates = new HashSet<>();
 		Deque<State> nextStates = new LinkedList<>();
 		seenStates.add(initialState);
@@ -42,6 +54,7 @@ public class Solution {
 					if (current.isSolution() != -1) {
 						foundSolution = true;
 						((ByteState)current).printBoard();
+						drawer.update(current.getInfo());
 					} else {
 						if (!seenStates.contains(current)) {
 							nextStates.offer(current);

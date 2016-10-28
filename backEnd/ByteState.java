@@ -156,6 +156,7 @@ class ByteState implements State {
 								default:
 									throw new AssertionError("Error 1");
 							}
+							break;
 						case 3:
 							info[i][j].elem = Element.DOT;
 							switch(board[i][j] & 0x0F) {
