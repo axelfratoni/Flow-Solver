@@ -16,11 +16,11 @@ public class NewSquareState implements State {
 	private Square[][] board;
 	private int incompletePaths;
 	private Map<Integer,Point> colors;
-	private int index;
+	private int index, hashCode;
 	
-	public static int contador = 0;
 	
 	public NewSquareState(int width, int length){
+		this.hashCode = -1;
 		colors = new HashMap<Integer, Point>();
 		index = 9;
 		board = new Square[width][length];
@@ -37,7 +37,7 @@ public class NewSquareState implements State {
 	}
 	
 	public NewSquareState(Square[][] board, int incompletePaths,int nextIndex, Map<Integer,Point> colors){
-		contador++;
+		this.hashCode = -1;
 		this.board = board;
 		this.incompletePaths = incompletePaths;
 		
@@ -56,7 +56,7 @@ public class NewSquareState implements State {
 	public Set<State> getNextStates() {
 		Set<State> paths = new HashSet<State>();
 		paths.addAll(getFirstPathStates(colors.get(index).y,colors.get(index).x,board));
-//		System.out.println(nextStates);
+//		System.out.println(paths);
 		return paths;
 	}
 
@@ -333,6 +333,9 @@ public class NewSquareState implements State {
 		return board;
 	}
 	public int hashCode(){
+		if(this.hashCode != -1){
+			return this.hashCode;
+		}
 		int hash = 0;
 		for(int i = 0; i < board.length ; i++){
 			for(int j = 0; j < board[0].length; j++){
@@ -358,7 +361,7 @@ public class NewSquareState implements State {
 				}
 			}
 		}
-		
+		this.hashCode = hash;
 		return hash;
 	}
 	
@@ -420,7 +423,7 @@ public class NewSquareState implements State {
 	public boolean equals(Object o) {
 		if (this == o) 
 			return true;
-		return (o instanceof SquareState && hasSameBoard(((NewSquareState) o).board));
+		return (o instanceof NewSquareState && hasSameBoard(((NewSquareState) o).board));
 	}
 
 	private boolean hasSameBoard(Square[][] board2) {
