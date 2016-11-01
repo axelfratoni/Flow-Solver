@@ -2,12 +2,11 @@ package frontEnd;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.stage.Stage;
+import javafx.scene.layout.Pane;
+import javafx.scene.image.Image;
 import backEnd.Direction;
 import backEnd.Element;
 import backEnd.Square;
-import javafx.scene.layout.Pane;
-import javafx.scene.image.Image;
-
 
 public class Drawer  {
 	Stage stage;

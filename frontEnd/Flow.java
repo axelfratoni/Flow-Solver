@@ -1,7 +1,7 @@
 package frontEnd;
 
 import backEnd.*;
-import controler.*;
+import controller.*;
 import java.io.*;
 import java.util.Map;
 import java.util.HashMap;

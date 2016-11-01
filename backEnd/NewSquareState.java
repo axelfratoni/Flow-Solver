@@ -332,6 +332,30 @@ public class NewSquareState implements State {
 	public Square[][] getInfo() {
 		return board;
 	}
+
+	public int hashCode() {
+		if (this.hashCode != -1) {
+			return this.hashCode;
+		}
+		hashCode = 17;
+		for (int i = 0; i < board.length; i++) {
+			for (int j = 0; j < board.length; j++) {
+				hashCode = 37*(37*hashCode + i) + j;
+				if (board[i][j].elem != null) {
+					hashCode = 37*(37*hashCode + board[i][j].elem.hashCode()) + board[i][j].color;
+				}
+				if (board[i][j].dir1 != null) {
+					hashCode = 37*hashCode + board[i][j].dir1.hashCode();
+				}
+				if (board[i][j].dir2 != null) {
+					hashCode = 37*hashCode + board[i][j].dir2.hashCode();
+				}
+			}
+		}
+		return hashCode;
+	}
+
+	/*
 	public int hashCode(){
 		if(this.hashCode != -1){
 			return this.hashCode;
@@ -364,7 +388,8 @@ public class NewSquareState implements State {
 		this.hashCode = hash;
 		return hash;
 	}
-	
+	*/
+
 	public String toString(){
 		printBoard();
 		return " ";
