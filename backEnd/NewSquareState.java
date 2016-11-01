@@ -61,12 +61,13 @@ public class NewSquareState implements State {
 	}
 
 
-	private Set<State> getFirstPathStates(int i, int j,Square[][] currentBoard) {
+	private Set<State> getFirstPathStates(int i, int j,Square[][] currentBoard){
 		Set<State> state = new HashSet<>();
 		int c = connects(i,j,currentBoard);
-		if(imNextToSomething(currentBoard,i,j)){
+		int iNtS = imNextToSomething(currentBoard,i,j);
+		if(iNtS != 0){
 			NewSquareState nss = new NewSquareState(currentBoard, incompletePaths - 2, index+1 ,colors);
-			if(nss.hasBlockedPaths() && !hasOtherPaths(currentBoard)){
+			if(nss.hasBlockedPaths()){
 				return state;
 			}
 		}
@@ -91,11 +92,14 @@ public class NewSquareState implements State {
 					break;
 			}
 			NewSquareState nss = new NewSquareState(newBoard, incompletePaths - 2, index+1 ,colors);
-			if(nss.hasBlockedPaths() && !hasOtherPaths(newBoard)){
+			System.out.println(nss.toString());
+			if(nss.hasBlockedPaths()){
 				return state;
 			}
 			state.add(nss);
-			
+			if(!hasOtherPaths(newBoard,c,i,j)){
+				return state;
+			}
 		}
 		
 		if (isInRange(i+1,j) && currentBoard[i+1][j].elem == null){
@@ -134,22 +138,20 @@ public class NewSquareState implements State {
 	}
 	
 	
-	
-	
-	private boolean imNextToSomething(Square[][] currentBoard, int i, int j) {
+	private int imNextToSomething(Square[][] currentBoard, int i, int j) {
 		if((isInRange(i+1,j) && currentBoard[i+1][j].elem != null && !comingFromLeftOrRight(currentBoard,i,j) ) || (!isInRange(i+1,j) && !comingFromLeftOrRight(currentBoard,i,j))){
-			return true;
+			return 1;
 		}
 		if((isInRange(i-1,j) && currentBoard[i-1][j].elem != null && !comingFromLeftOrRight(currentBoard,i,j)) || (!isInRange(i-1,j) && !comingFromLeftOrRight(currentBoard,i,j))){
-			return true;
+			return 2;
 		}
 		if((isInRange(i,j+1) && currentBoard[i][j+1].elem != null && !comingFromUpOrDown(currentBoard,i,j))|| (!isInRange(i,j+1) && !comingFromUpOrDown(currentBoard,i,j))){
-			return true;
+			return 3;
 		}
 		if((isInRange(i,j-1) && currentBoard[i][j-1].elem != null && !comingFromUpOrDown(currentBoard,i,j))|| (!isInRange(i,j-1) && !comingFromUpOrDown(currentBoard,i,j))){
-			return true;
+			return 4;
 		}
-		return false;
+		return 0;
 	}
 	
 	private boolean comingFromLeftOrRight(Square[][] currentBoard, int i, int j){
@@ -184,8 +186,6 @@ public class NewSquareState implements State {
 		return 0;
 	}
 
-
-	
 	private boolean hasBlockedPaths() {
 		Iterator<Entry<Integer,Point>> it = colors.entrySet().iterator();
 		
@@ -205,12 +205,27 @@ public class NewSquareState implements State {
 		return false;
 	}
 	
-	private boolean hasOtherPaths(Square[][] currentBoard){
+	private boolean hasOtherPaths(Square[][] currentBoard, int whereFrom,int i, int j){
 		Point p = colors.get(index);
+		int a = 0;
+		int b = 0;
+		int c = 0;
+		int d = 0;
+		if(whereFrom == 1 || whereFrom == 2){
+			if(isInRange(i,j+1))
+				a = 1;
+			if(isInRange(i,j-1))
+				b = -1;
+		} else{
+			if(isInRange(i+1,j))
+				c = 1;
+			if(isInRange(i-1,j))
+				d = -1;
+		}
 		byte[][] miniBoard = createSpecialMiniBoard(currentBoard);
-		return checkIfThereIsAPath(miniBoard,p.y,p.x,true);
+		boolean pathAvailable = (checkIfThereIsAPath(miniBoard,i+c,j+a,true) || checkIfThereIsAPath(miniBoard,i+d,j+b,true));
+		return pathAvailable;
 	}
-	
 	
 	private byte[][] createSpecialMiniBoard(Square[][] currentBoard) {
 		byte[][] miniBoard = new byte[currentBoard.length][currentBoard[0].length];
@@ -280,7 +295,6 @@ public class NewSquareState implements State {
 		return i >= 0 && j >= 0 && i < board.length && j < board[0].length;
 	}
 	
-	
 	public void setDot(int color, int i, int j) {
 		if (color == -1){
 		} else {
@@ -301,7 +315,6 @@ public class NewSquareState implements State {
 		return (incompletePaths > 0)? -1 : emptySpaces();
 	}
 
-	
 	private int emptySpaces() {
 		int acum = 0;
 		for(int i = 0; i < board.length ; i++){
@@ -339,7 +352,7 @@ public class NewSquareState implements State {
 		}
 		hashCode = 17;
 		for (int i = 0; i < board.length; i++) {
-			for (int j = 0; j < board.length; j++) {
+			for (int j = 0; j < board[0].length; j++) {
 				hashCode = 37*(37*hashCode + i) + j;
 				if (board[i][j].elem != null) {
 					hashCode = 37*(37*hashCode + board[i][j].elem.hashCode()) + board[i][j].color;
