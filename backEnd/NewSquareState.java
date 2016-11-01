@@ -16,9 +16,8 @@ public class NewSquareState implements State {
 	private Square[][] board;
 	private int incompletePaths;
 	private Map<Integer,Point> colors;
-	public int index, hashCode;
-	
-	
+	private int index, hashCode;
+	private NewSquareState auxiliarState; 
 	public NewSquareState(int width, int length){
 		this.hashCode = -1;
 		colors = new HashMap<Integer, Point>();
@@ -55,13 +54,18 @@ public class NewSquareState implements State {
 	@Override
 	public Set<State> getNextStates() {
 		Set<State> paths = new HashSet<State>();
-		paths.addAll(getFirstPathStates(colors.get(index).y,colors.get(index).x,board));
+		try{
+			paths.addAll(getFirstPathStates(colors.get(index).y, colors.get(index).x, board));
+		}catch(BestPathPossibleException e){
+			paths = new HashSet<State>();
+			paths.add(auxiliarState);
+		}
 //		System.out.println(paths);
 		return paths;
 	}
 
 
-	private Set<State> getFirstPathStates(int i, int j,Square[][] currentBoard){
+	private Set<State> getFirstPathStates(int i, int j,Square[][] currentBoard) throws BestPathPossibleException{
 		Set<State> state = new HashSet<>();
 		int c = connects(i,j,currentBoard);
 		int iNtS = imNextToSomething(currentBoard,i,j);
@@ -97,6 +101,10 @@ public class NewSquareState implements State {
 				return state;
 			}
 			state.add(nss);
+			if(nss.isSolution() == 0){
+				this.auxiliarState = nss;
+				throw new BestPathPossibleException();
+			}
 			if(!hasOtherPaths(newBoard,c,i,j)){
 				return state;
 			}
@@ -263,18 +271,26 @@ public class NewSquareState implements State {
 		miniBoard[i][j] = 0;
 		boolean thereIsAPath = false;
 		if(isInRange(i+1,j)){
-			thereIsAPath = thereIsAPath || checkIfThereIsAPath(miniBoard,i+1,j,false);
+			thereIsAPath = checkIfThereIsAPath(miniBoard,i+1,j,false);
+			if(thereIsAPath)
+				return true;
 		}
 		if(isInRange(i-1,j)){
-			thereIsAPath = thereIsAPath || checkIfThereIsAPath(miniBoard,i-1,j,false);
+			thereIsAPath = checkIfThereIsAPath(miniBoard,i-1,j,false);
+			if(thereIsAPath)
+				return true;
 		}
 		if(isInRange(i,j+1)){
-			thereIsAPath = thereIsAPath || checkIfThereIsAPath(miniBoard,i,j+1,false);
+			thereIsAPath = checkIfThereIsAPath(miniBoard,i,j+1,false);
+			if(thereIsAPath)
+				return true;
 		}
 		if(isInRange(i,j-1)){
-			thereIsAPath = thereIsAPath || checkIfThereIsAPath(miniBoard,i,j-1,false);
+			thereIsAPath = checkIfThereIsAPath(miniBoard,i,j-1,false);
+			if(thereIsAPath)
+				return true;
 		}
-		return thereIsAPath;
+		return false;
 	}
 
 	private byte[][] createMiniBoard(Integer i) {
