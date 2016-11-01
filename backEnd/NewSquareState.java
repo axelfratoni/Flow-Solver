@@ -16,7 +16,7 @@ public class NewSquareState implements State {
 	private Square[][] board;
 	private int incompletePaths;
 	private Map<Integer,Point> colors;
-	private int index, hashCode;
+	public int index, hashCode;
 	
 	
 	public NewSquareState(int width, int length){
@@ -72,6 +72,7 @@ public class NewSquareState implements State {
 			}
 		}
 		if (c != 0){
+			//System.out.print(this.index+" ");
 			Square[][] newBoard = copyBoard(currentBoard);
 			switch(c){
 				case 1:
@@ -137,17 +138,19 @@ public class NewSquareState implements State {
 	}
 	
 	
+	
+	
 	private int imNextToSomething(Square[][] currentBoard, int i, int j) {
-		if((isInRange(i+1,j) && currentBoard[i+1][j].elem != null && !comingFromLeftOrRight(currentBoard,i,j) ) || (!isInRange(i+1,j) && !comingFromLeftOrRight(currentBoard,i,j))){
+		if((isInRange(i+1,j) && currentBoard[i+1][j].elem != null && currentBoard[i+1][j].color != index) || (!isInRange(i+1,j))){
 			return 1;
 		}
-		if((isInRange(i-1,j) && currentBoard[i-1][j].elem != null && !comingFromLeftOrRight(currentBoard,i,j)) || (!isInRange(i-1,j) && !comingFromLeftOrRight(currentBoard,i,j))){
+		if((isInRange(i-1,j) && currentBoard[i-1][j].elem != null && currentBoard[i-1][j].color != index) || (!isInRange(i-1,j))){
 			return 2;
 		}
-		if((isInRange(i,j+1) && currentBoard[i][j+1].elem != null && !comingFromUpOrDown(currentBoard,i,j))|| (!isInRange(i,j+1) && !comingFromUpOrDown(currentBoard,i,j))){
+		if((isInRange(i,j+1) && currentBoard[i][j+1].elem != null && currentBoard[i][j+1].color != index)|| (!isInRange(i,j+1))){
 			return 3;
 		}
-		if((isInRange(i,j-1) && currentBoard[i][j-1].elem != null && !comingFromUpOrDown(currentBoard,i,j))|| (!isInRange(i,j-1) && !comingFromUpOrDown(currentBoard,i,j))){
+		if((isInRange(i,j-1) && currentBoard[i][j-1].elem != null && currentBoard[i][j-1].color != index)|| (!isInRange(i,j-1))){
 			return 4;
 		}
 		return 0;
