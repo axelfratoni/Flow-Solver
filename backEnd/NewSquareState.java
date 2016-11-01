@@ -92,7 +92,6 @@ public class NewSquareState implements State {
 					break;
 			}
 			NewSquareState nss = new NewSquareState(newBoard, incompletePaths - 2, index+1 ,colors);
-			System.out.println(nss.toString());
 			if(nss.hasBlockedPaths()){
 				return state;
 			}
