@@ -2,6 +2,8 @@ package backEnd;
 
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.HashMap;
 
 public class ByteState implements State {
 	
@@ -15,27 +17,20 @@ public class ByteState implements State {
 	private int emptySquares, inconexDots;
 	private byte[][] board;
 	
-	public ByteState(int i, int j) {
+	private int hashCode;
+
+	private ByteState(int i, int j) {
 		board = new byte[i][j];
 		inconexDots = 0;
 		emptySquares = i*j;
+		hashCode = 0;
 	}
 
 	private ByteState(byte[][] copy, int inconexDots, int emptySquares) {
 		this.board = copy;
 		this.inconexDots = inconexDots;
 		this.emptySquares = emptySquares;
-	}
-	
-	public void setDot(int color, int i, int j) {
-		if (color == -1) {
-			board[i][j] = 0;
-		}
-		else {
-			board[i][j] = (byte) ((color << 4) | 0xF);
-			inconexDots++;
-			emptySquares--;
-		}
+		hashCode = 0;
 	}
 
 	public Set<State> getNextStates() {
@@ -118,7 +113,7 @@ public class ByteState implements State {
 					info[i][j] = null;
 				} else {
 					info[i][j] = new Square();
-					info[i][j].color = board[i][j] >> 4;
+					info[i][j].color = board[i][j] >>> 4;
 					switch(lb) {
 						case 1:
 							info[i][j].elem = Element.LINE;
@@ -236,13 +231,15 @@ public class ByteState implements State {
 	}
 
 	public int hashCode() {
-		int result = 0;
-		for (int i = 0; i < board.length; i++) {
-			for (int j = 0; j < board[0].length; j++) {
-				result ^= (board[i][j] << (i % 4));
+		
+		if (hashCode == 0) {
+			for (int i = 0; i < board.length; i++) {
+				for (int j = 0; j < board[0].length; j++) {
+					hashCode ^= (board[i][j] << 4*(i % 4));
+				}
 			}
 		}
-		return result;
+		return hashCode;
 	}
 
 	public boolean equals(Object o) {
@@ -264,16 +261,7 @@ public class ByteState implements State {
 	}
 
 	public void printBoard() {
-		/*
-		for (int i = 0; i < board.length; i++) {
-			for (int j = 0; j < board[0].length; j++) {
-				System.out.print(board[i][j] + " ");
-			}
-			System.out.println();
-		}
-		System.out.println();
-		*/
-		
+			
 		for (int i = 0; i < board.length; i++) {
 			for (int j = 0; j < board[0].length; j++) {
 				if (board[i][j] == 0) {
@@ -309,4 +297,50 @@ public class ByteState implements State {
 		System.out.println();
 	}
 
+
+	public static class ByteStateBuilder implements StateBuilder {
+
+		private byte[][] board;
+		private int inconexDots, emptySquares;
+		private Map<Integer, Integer> checkMap;
+
+		public ByteStateBuilder(int n, int m) {
+			board = new byte[n][m];
+			inconexDots = 0;
+			emptySquares = n*m;
+			checkMap = new HashMap<Integer, Integer>();
+		}
+
+		public void setDot(int color, int i, int j) {
+			if (color == -1) {
+				board[i][j] = 0;
+			} else {
+				board[i][j] = (byte) ((color << 4) | 0xF);
+				inconexDots++;
+				emptySquares--;
+				if (checkMap.containsKey(color)) {
+					checkMap.put(color, checkMap.get(color) + 1);
+				} else {
+					checkMap.put(color, 1);
+				}
+			}
+		}
+
+		public State build() {
+			if (!isBoardValid(board)) {
+				throw new IllegalStateException();
+			}
+			return new ByteState(board, inconexDots, emptySquares);
+		}
+
+		private boolean isBoardValid(byte[][] board) {
+			for (Integer color: checkMap.keySet()) {
+				int reps = checkMap.get(color);
+				if (reps != 2) {
+					return false;
+				}
+			}
+			return true;
+		}
+	}
 }

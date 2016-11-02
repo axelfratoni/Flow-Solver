@@ -132,8 +132,7 @@ public class Flow extends Application {
 
 			// Read board
 			
-			Map<Integer, Integer> checkMap = new HashMap<>();	// Para chequear que para cada color haya dos puntos o ninguno
-			initialState = new NewSquareState(rows, cols);
+			StateBuilder builder = new ByteState.ByteStateBuilder(rows, cols);
 			for (int i = 0; i < rows; i++) {
 				line = myReader.readLine();
 				if (line == null) {
@@ -152,14 +151,9 @@ public class Flow extends Application {
 						return 11;
 					}
 					if (c == ' ') {
-						initialState.setDot(-1, i, j);
+						builder.setDot(-1, i, j);
 					} else {
-						initialState.setDot((int) c, i, j);
-						if (checkMap.containsKey((int) c)) {
-							checkMap.put((int) c, checkMap.get((int) c) + 1);
-						} else {
-							checkMap.put((int) c, 1);
-						}
+						builder.setDot((int) c, i, j);
 					}
 				}
 			}
@@ -168,13 +162,13 @@ public class Flow extends Application {
 				System.err.println("Invalid input after board: " + line);
 				return 12;
 			}
-			for (Integer color: checkMap.keySet()) {
-				int reps = checkMap.get(color);
-				if (reps != 2) {
-					System.err.println("Invalid board: color " + (color - '0') + " appears " + reps + " time" + (reps != 1 ? "s" : ""));
-					return 13;
-				}
+			try {
+				initialState = builder.build();
+			} catch (IllegalStateException e) {
+				System.err.println("An invalid board was entered");
+				return 13;
 			}
+
 
 		} catch (FileNotFoundException e) {
 			System.err.println("Unable to open file: " + fileName);
