@@ -16,7 +16,7 @@ public class NewByteState implements State {
 
 	private int emptySquares, inconexDots;
 	private byte[][] board;
-	private int[] color;
+	private int[] colors;
 	private int index;
 
 	private int hashCode;
@@ -28,82 +28,79 @@ public class NewByteState implements State {
 		hashCode = 0;
 	}
 
-	private NewByteState(byte[][] copy, int inconexDots, int emptySquares) {
+	private NewByteState(byte[][] copy, int inconexDots, int emptySquares, int[] colors, int index) {
 		this.board = copy;
 		this.inconexDots = inconexDots;
 		this.emptySquares = emptySquares;
+		this.colors = colors;
+		// Adjust index
+		if (inconexDots != 0) {
+			for (; colors[index] == 0; index++);
+		}
+		this.index = index;
 		hashCode = 0;
 	}
 
 	public Set<State> getNextStates() {
-		Set<State> result = new HashSet<>();
-		for (int i = 0; i < board.length; i++) {
-			for (int j = 0; j < board[0].length; j++) {
-				int lb = 0;
-				if ((board[i][j] & 0x0F) != 0 && (lb = lowerBitsOn(board[i][j])) != 3 && lb != 2) {	// Square is not empty and it's not a connected dot and it's not a full line
-					boolean added = false;
-					added |= addNextStates(i, j, -1, 0, BINARY_UP, BINARY_DOWN, result);
-					added |= addNextStates(i, j, 1, 0, BINARY_DOWN, BINARY_UP, result);
-					added |= addNextStates(i, j, 0, -1, BINARY_LEFT, BINARY_RIGHT, result);
-					added |= addNextStates(i, j, 0, 1, BINARY_RIGHT, BINARY_LEFT, result);
-					if (!added) {
-						return null;
-					}
-				}
-			}
+		Set<State> paths;
+		System.out.println("Entramo ameoh");
+		try {
+			paths = getNextPathStates(board, (colors[index] >>> 24) & 0x000000FF, (colors[index] >>> 16) & 0x000000FF, emptySquares);
+		} catch (BestPathPossibleException e) {
+			paths =  new HashSet<State>();
+			paths.add(e.bestPathPossible);
+			System.out.println("EXCEPTION THROWN");
+			return paths;
+		
 		}
+		for (State s: paths) {
+			s.printBoard();
+		}
+		return paths;
+	}
+
+	private Set<State> getNextPathStates(byte[][] board, int i, int j, int emptySpaces) throws BestPathPossibleException {
+
+		if (board[i][j] >>> 4 != index) {
+			throw new RuntimeException("Color equivocado: board[i][j] >>> 4 = " + (board[i][j] >>> 4)  + " board[i][j] = " + board[i][j] + " index = " + index);
+		}
+
+		if (board.length < 0) {
+			throw new BestPathPossibleException(new NewByteState(1,1));
+		}
+		Set<State> result = new HashSet<>();
+		getNextPathStatesDir(board, i, j, -1, 0, emptySpaces, BINARY_UP, BINARY_DOWN, result);
+		getNextPathStatesDir(board, i, j, 1, 0, emptySpaces, BINARY_DOWN, BINARY_UP, result);
+		getNextPathStatesDir(board, i, j, 0, -1, emptySpaces, BINARY_LEFT, BINARY_RIGHT, result);
+		getNextPathStatesDir(board, i, j, 0, 1, emptySpaces, BINARY_RIGHT, BINARY_LEFT, result);
 		return result;
 	}
 
-	private boolean addNextStates(int x, int y, int i, int j, byte mask, byte opposite_mask, Set<State> result) {
-		boolean inRange = isInRange(x+i, y+j);
-		if (inRange && ((board[x][y] & 0x0F) == BINARY_DOT || (lowerBitsOn(board[x][y]) == 1 && ((board[x][y]^mask) & 0x0F) != 0))) {	// It's a non-connected dot or a non-maskwards line
-			boolean added = false;
-			if ((board[x+i][y+j] & 0x0F) == 0) {	// Masker square is empty
-				byte[][] newBoard = new byte[board.length][];
-				for (int k = 0; k < board.length; k++) {
-					newBoard[k] = board[k].clone();
-				}
+	private void getNextPathStatesDir(byte[][] board, int x, int y, int i, int j, int emptySpaces, byte mask, byte opposite_mask, Set<State> bag) throws BestPathPossibleException {
+		
+		if (isInRange(x+i, y+j)) {
+			if (board[x+i][y+j] == 0) {
+				byte[][] newBoard = copyBoard(board);
 				newBoard[x][y] ^= mask;
 				newBoard[x+i][y+j] = (byte) ((opposite_mask) + (newBoard[x][y] & 0xF0));
-				result.add(new NewByteState(newBoard, inconexDots, emptySquares - 1));
-				added = true;
-			} else if (board[x+i][y+j] >> 4 == board[x][y] >> 4) {	// Masker square has same color
-				int lb = lowerBitsOn(board[x+i][y+j]);
-				if (lb == 4) {			// Masker square has a dot and it's not connected
-					byte[][] newBoard = new byte[board.length][];
-					for (int k = 0; k < board.length; k++) {
-						newBoard[k] = board[k].clone();
-					}
-					newBoard[x][y] ^= mask;	// Add mask-line to current dot
-					newBoard[x+i][y+j] ^= opposite_mask;	// Add opposite_mask-line to upper dot
-					
-					NewByteState newState = new NewByteState(newBoard, inconexDots - 2, emptySquares);
-					if (newState.isSolvable()) {
-						result.add(newState);
-						added = true;
-					}
-				} else if (lb == 1) {	// Masker square has a one-way line
-					byte[][] newBoard = new byte[board.length][];
-					for (int k = 0; k < board.length; k++) {
-						newBoard[k] = board[k].clone();
-					}
-					newBoard[x][y] ^= mask;	// Add mask-line to current dot
-					newBoard[x+i][y+j] ^= opposite_mask;	// Add opposite_mask-line to upper dot
-					NewByteState newState = new NewByteState(newBoard, inconexDots - 2, emptySquares);
-					if (newState.isSolvable()) {
-						result.add(newState);
-						added = true;
-					}
+				bag.addAll(getNextPathStates(newBoard, x+i, y+j, emptySpaces - 1));
+			} else {
+				if (board[x+i][y+j] >>> 4 == board[x][y] >>> 4 && lowerBitsOn(board[x+i][y+j]) == 4) {	// Same color dot
+					byte[][] newBoard = copyBoard(board);
+					newBoard[x][y] ^= mask;
+					newBoard[x+i][y+j] ^= opposite_mask;
+					bag.add(new NewByteState(newBoard, inconexDots-2, emptySpaces, colors, index+1));
 				}
 			}
-			return added;
 		}
-		if (!inRange || ((lowerBitsOn(board[x][y]) == 1 && ((board[x][y]^mask) & 0x0F) == 0))) {	// It's not in range or it's a maskward line
-			return false;
-		} else {
-			return true;
+	}
+
+	private byte[][] copyBoard(byte[][] board) {
+		byte[][] newBoard = new byte[board.length][];
+		for (int k = 0; k < board.length; k++) {
+			newBoard[k] = board[k].clone();
 		}
+		return newBoard;
 	}
 
 	public Square[][] getInfo() {
@@ -195,12 +192,6 @@ public class NewByteState implements State {
 		} else {
 			throw new AssertionError("Error4");
 		}
-	}
-
-	// Missing implementation
-	@Deprecated
-	private boolean isSolvable() {
-		return true;
 	}
 
 	private Direction getOneLineDirection(byte oneLine) {
@@ -305,25 +296,37 @@ public class NewByteState implements State {
 		private byte[][] board;
 		private int inconexDots, emptySquares;
 		private Map<Integer, Integer> checkMap;
+		private int[] colors;
 
 		public NewByteStateBuilder(int n, int m) {
 			board = new byte[n][m];
 			inconexDots = 0;
 			emptySquares = n*m;
 			checkMap = new HashMap<Integer, Integer>();
+			colors = new int[10];
+			for (int i = 0; i < colors.length; i++) {
+				colors[i] = 0;
+			}
 		}
 
 		public void setDot(int color, int i, int j) {
+			
+			if (color < -1 || color - '0' > 9) {
+				throw new IllegalArgumentException("Invalid color " + color);
+			}
 			if (color == -1) {
 				board[i][j] = 0;
 			} else {
+				color = color - '0';
 				board[i][j] = (byte) ((color << 4) | 0xF);
 				inconexDots++;
 				emptySquares--;
 				if (checkMap.containsKey(color)) {
 					checkMap.put(color, checkMap.get(color) + 1);
+					colors[color] |= (i << 8) | j;
 				} else {
 					checkMap.put(color, 1);
+					colors[color] = (i << 24) | (j << 16);
 				}
 			}
 		}
@@ -332,7 +335,7 @@ public class NewByteState implements State {
 			if (!isBoardValid(board)) {
 				throw new IllegalStateException();
 			}
-			return new NewByteState(board, inconexDots, emptySquares, , 0);
+			return new NewByteState(board, inconexDots, emptySquares, colors.clone(), 0);
 		}
 
 		private boolean isBoardValid(byte[][] board) {

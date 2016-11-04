@@ -22,6 +22,7 @@ public class NewSquareState implements State {
 		this.hashCode = -1;
 		this.board = board;
 		this.incompletePaths = incompletePaths;
+		this.emptySpaces = emptySpaces;
 
 		while (!colors.containsKey(nextIndex)) {
 			nextIndex++;
@@ -47,15 +48,15 @@ public class NewSquareState implements State {
 	}
 
 	private Set<State> getFirstPathStates(int i, int j, Square[][] currentBoard, int eS) throws BestPathPossibleException {
-		Set<State> state = new HashSet<>();
-		int c = connects(i, j, currentBoard);
+		Set<State> result = new HashSet<>();
 		int iNtS = imNextToSomething(currentBoard, i, j);
 		if (iNtS != 0) {
 			NewSquareState nss = new NewSquareState(currentBoard, incompletePaths - 2, index + 1, eS, colors);
 			if (nss.hasBlockedPaths()) {
-				return state;
+				return result;
 			}
 		}
+		int c = connects(i, j, currentBoard);
 		if (c != 0) {
 			Square[][] newBoard = copyBoard(currentBoard);
 			switch (c) {
@@ -76,17 +77,15 @@ public class NewSquareState implements State {
 				newBoard[i][j - 1].dir1 = RIGHT;
 				break;
 			}
-			NewSquareState nss = new NewSquareState(newBoard, incompletePaths - 2, index + 1, eS - 1, colors);
-			if (nss.hasBlockedPaths()) {
-				return state;
-			}
-			state.add(nss);
+			NewSquareState nss = new NewSquareState(newBoard, incompletePaths - 2, index + 1, eS, colors);
+			
+			result.add(nss);
 			if (nss.isSolution() == 0) {
 				this.auxiliarState = nss;
-				throw new BestPathPossibleException();
+				throw new BestPathPossibleException(nss);
 			}
 			if (!hasOtherPaths(newBoard, c, i, j)) {
-				return state;
+				return result;
 			}
 		}
 
@@ -97,7 +96,7 @@ public class NewSquareState implements State {
 			newBoard[i + 1][j].dir1 = UP;
 			decideWhich(newBoard[i][j], DOWN);
 			if(dotIsReachable(newBoard,i+1,j))
-				state.addAll(getFirstPathStates(i + 1, j, newBoard, eS -1));
+				result.addAll(getFirstPathStates(i + 1, j, newBoard, eS -1));
 		}
 		if (isInRange(i - 1, j) && currentBoard[i - 1][j].elem == null) {
 			Square[][] newBoard = copyBoard(currentBoard);
@@ -106,7 +105,7 @@ public class NewSquareState implements State {
 			newBoard[i - 1][j].dir1 = DOWN;
 			decideWhich(newBoard[i][j], UP);
 			if(dotIsReachable(newBoard,i-1,j))
-				state.addAll(getFirstPathStates(i - 1, j, newBoard, eS -1));
+				result.addAll(getFirstPathStates(i - 1, j, newBoard, eS -1));
 		}
 		if (isInRange(i, j + 1) && currentBoard[i][j + 1].elem == null) {
 			Square[][] newBoard = copyBoard(currentBoard);
@@ -115,7 +114,7 @@ public class NewSquareState implements State {
 			newBoard[i][j + 1].dir1 = LEFT;
 			decideWhich(newBoard[i][j], RIGHT);
 			if(dotIsReachable(newBoard,i,j+1))
-				state.addAll(getFirstPathStates(i, j + 1, newBoard, eS -1));
+				result.addAll(getFirstPathStates(i, j + 1, newBoard, eS -1));
 		}
 		if (isInRange(i, j - 1) && currentBoard[i][j - 1].elem == null) {
 			Square[][] newBoard = copyBoard(currentBoard);
@@ -124,9 +123,9 @@ public class NewSquareState implements State {
 			newBoard[i][j - 1].dir1 = RIGHT;
 			decideWhich(newBoard[i][j], LEFT);
 			if(dotIsReachable(newBoard,i,j-1))
-				state.addAll(getFirstPathStates(i, j - 1, newBoard, eS -1));
+				result.addAll(getFirstPathStates(i, j - 1, newBoard, eS -1));
 		}
-		return state;
+		return result;
 	}
 
 	private boolean dotIsReachable(Square[][] newBoard, int i, int j) {
@@ -494,6 +493,7 @@ public class NewSquareState implements State {
 				board[i][j].elem = DOT;
 				board[i][j].color = color;
 				incompletePaths++;
+				emptySpaces--;
 			}
 		}
 

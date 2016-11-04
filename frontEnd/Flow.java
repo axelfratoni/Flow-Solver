@@ -132,7 +132,7 @@ public class Flow extends Application {
 
 			// Read board
 			
-			StateBuilder builder = new ByteState.ByteStateBuilder(rows, cols);
+			StateBuilder builder = new NewByteState.NewByteStateBuilder(rows, cols);
 			for (int i = 0; i < rows; i++) {
 				line = myReader.readLine();
 				if (line == null) {
