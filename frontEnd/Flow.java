@@ -1,7 +1,7 @@
 package frontEnd;
 
 import backEnd.*;
-import controler.*;
+import controller.*;
 import java.io.*;
 import java.util.Map;
 import java.util.HashMap;
@@ -132,8 +132,7 @@ public class Flow extends Application {
 
 			// Read board
 			
-//			StateBuilder builder = new ByteState.ByteStateBuilder(rows, cols);
-			StateBuilder builder = new NewSquareState.NewSquareStateBuilder(rows, cols);
+			StateBuilder builder = new ByteState.ByteStateBuilder(rows, cols);
 			for (int i = 0; i < rows; i++) {
 				line = myReader.readLine();
 				if (line == null) {
