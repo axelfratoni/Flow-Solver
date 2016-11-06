@@ -39,7 +39,7 @@ public class NewSquareState implements State {
 		Set<State> paths = new HashSet<State>();
 		try {
 			paths.addAll(getFirstPathStates(colors.get(index).y, colors.get(index).x, board, emptySpaces));
-		} catch (BestPathPossibleException e) {
+		} catch (BestPathPossibleAlert e) {
 			paths = new HashSet<State>();
 			paths.add(auxiliarState);
 		}
@@ -47,7 +47,7 @@ public class NewSquareState implements State {
 		return paths;
 	}
 
-	private Set<State> getFirstPathStates(int i, int j, Square[][] currentBoard, int eS) throws BestPathPossibleException {
+	private Set<State> getFirstPathStates(int i, int j, Square[][] currentBoard, int eS) throws BestPathPossibleAlert {
 		Set<State> result = new HashSet<>();
 		int iNtS = imNextToSomething(currentBoard, i, j);
 		if (iNtS != 0) {
@@ -82,7 +82,7 @@ public class NewSquareState implements State {
 			result.add(nss);
 			if (nss.isSolution() == 0) {
 				this.auxiliarState = nss;
-				throw new BestPathPossibleException(nss);
+				throw new BestPathPossibleAlert(nss);
 			}
 			if (!hasOtherPaths(newBoard, c, i, j)) {
 				return result;

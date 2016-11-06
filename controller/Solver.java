@@ -29,8 +29,9 @@ public class Solver {
 			long t = System.currentTimeMillis();
 			while(!nextStates.isEmpty() && !foundSolution) {
 				State thisState = nextStates.poll();
-				if (thisState.getNextStates() == null) continue;
-				for (State current: thisState.getNextStates()) {
+				Set<State> thisNextStates = thisState.getNextStates();
+				if (thisNextStates == null || thisNextStates.isEmpty()) continue;
+				for (State current: thisNextStates) {
 					if (!foundSolution) {
 						int thisSolution = current.isSolution();
 						if (thisSolution != -1) {
@@ -40,12 +41,12 @@ public class Solver {
 							if (thisSolution == 0) {
 								foundSolution = true;
 							}
-							//current.printBoard();
+							// current.printBoard();
 						} else {
 							if (!seenStates.contains(current)) {
 								nextStates.offer(current);
 								seenStates.add(current);
-								//current.printBoard();
+								// current.printBoard();
 							}
 						}
 					}
@@ -57,10 +58,15 @@ public class Solver {
 							System.err.println("What you wake me up for, biatch?");
 						}
 					}
+					if (foundSolution) {
+						break;
+					}
 				}
 			}
 			if (solvedState != null) {
 				drawer.update(solvedState.getInfo());
+			} else {
+				System.out.println("No solution found");
 			}
 			System.out.println("Time elapsed: " + (System.currentTimeMillis() - t)/1000.0 + " seconds");
 		}

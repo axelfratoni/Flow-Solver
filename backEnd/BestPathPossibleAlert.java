@@ -1,6 +1,6 @@
 package backEnd;
 
-public class BestPathPossibleException extends Throwable {
+public class BestPathPossibleAlert extends Throwable {
 	
 	public State bestPathPossible;
 
@@ -9,7 +9,7 @@ public class BestPathPossibleException extends Throwable {
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	public BestPathPossibleException(State bestPathPossible){ 
+	public BestPathPossibleAlert(State bestPathPossible){ 
 		super();
 		this.bestPathPossible = bestPathPossible;
 	}
