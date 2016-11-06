@@ -14,7 +14,7 @@ public class Solver {
 		this.drawer = drawer;
 	}
 
-	public void solve(Mode mode) {
+	public void solve(Mode mode, int time) {
 
 		if (mode == Mode.EXACT || mode == Mode.EXACT_PROGRESS) {
 			initialState.printBoard();
@@ -51,12 +51,12 @@ public class Solver {
 						}
 					}
 					if (mode == Mode.EXACT_PROGRESS) {
-						drawer.update(current.getInfo());
 						try {
 							Thread.currentThread().sleep(100);
 						} catch (InterruptedException e) {
 							System.err.println("What you wake me up for, biatch?");
 						}
+						current.printBoard();
 					}
 					if (foundSolution) {
 						break;

@@ -13,7 +13,7 @@ import javafx.stage.Stage;
 public class Flow extends Application {
 
 	private static Mode mode;
-	private static int time;
+	private static int time = 0;
 	private static State initialState;
 
 	public static void main(String[] args) {
@@ -37,13 +37,13 @@ public class Flow extends Application {
 		
 		Drawer drawer = new Drawer(primaryStage,initialState.getInfo());
 		Solver solver = new Solver(initialState, drawer);
-		solver.solve(mode);
+		solver.solve(mode, time);
 
 	}
 	
 	private static int readParameters(String[] args) {
 
-		if (args.length < 2 || args.length > 3) {
+		if (args.length < 2 || args.length > 4) {
 			System.err.println("Wrong number of parameters:");
 			showUsage();
 			return 1;
@@ -59,10 +59,13 @@ public class Flow extends Application {
 					showUsage();
 					return 2;
 				}
+			} else if (args.length == 4) {
+				System.err.println("Wrong number of parameters:");
+				showUsage();
 			}
 		} else if (args[1].equals("aprox")) {
 			mode = Mode.APROX;
-			if (args.length != 3) {
+			if (args.length == 2) {
 				System.err.println("Wrong number of parameters");
 				showUsage();
 				return 3;
@@ -79,10 +82,19 @@ public class Flow extends Application {
 				showUsage();
 				return 5;
 			}
+			if (args.length == 4) {
+				if (args[3].equals("progress")) {
+					mode = Mode.APROX_PROGRESS;
+				} else {
+					System.err.println("Unknown mode: " + args[3]);
+					showUsage();
+					return 6;
+				}
+			}
 		} else {
 			System.err.println("Unknown method: " + args[1]);
 			showUsage();
-			return 6;
+			return 7;
 		}
 
 		return 0;
@@ -193,6 +205,7 @@ public class Flow extends Application {
 		System.err.println("java -jar tpe.jar <file> exact");
 		System.err.println("java -jar tpe.jar <file> exact progress");
 		System.err.println("java -jar tpe.jar <file> aprox <time>");
+		System.err.println("java -jar tpe.jar <file> aprox <time> progress");
 	}
 	
 }
