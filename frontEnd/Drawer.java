@@ -80,7 +80,7 @@ public class Drawer  {
 			return;
 		}
 		
-		String name="Assets/";
+		String name="";
 		int rotate=0;
 		String colors[]= {"Pink","Green","Blue","Purple","Red","Orange","Yellow","Black","LightBlue","Grey"};
 		

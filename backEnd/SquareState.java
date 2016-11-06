@@ -236,7 +236,7 @@ public class SquareState implements State {
 		return sq.elem != null && ((sq.elem == LINE && sq.dir1 != null && sq.dir2 == null) || (sq.elem == DOT && sq.dir1 == null));
 	}
 	
-	@Override
+	@Deprecated
 	public void setDot(int color, int i, int j) {
 		if (color == -1){
 			emptySpaces++;

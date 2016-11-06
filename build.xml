@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ 
+<project name="Flow solver" default="jar" basedir="."
+  xmlns:fx="javafx:com.sun.javafx.tools.ant">
+
+  <property name="JAVA_HOME" value="/usr/local/java/jdk1.8.0_65"/>
+  <property name="build.src.dir" value="."/>
+  <property name="build.classes.dir" value="build/classes"/>
+  <property name="build.dist.dir" value="."/>
+ 
+  <target name="jar" depends="clean,compile">
+ 
+    <taskdef resource="com/sun/javafx/tools/ant/antlib.xml"
+      uri="javafx:com.sun.javafx.tools.ant"
+      classpath="${JAVA_HOME}/lib/ant-javafx.jar"/>
+
+    <fx:platform basedir="${JAVA_HOME}"/>
+
+    <fx:application id="FlowSolverID"
+      name="FlowSolverApp"
+      mainClass="frontEnd.Flow"/>
+ 
+    <fx:resources id="appRes">
+      <fx:fileset dir="${build.dist.dir}" includes="tpe.jar"/>
+    </fx:resources>
+ 
+    <fx:jar destfile="${build.dist.dir}/tpe.jar">
+      <fx:application refid="FlowSolverID"/>
+      <fx:resources refid="appRes"/>
+      <fileset dir="${build.classes.dir}"/>
+      <fileset dir="Assets/" />
+    </fx:jar>
+ 
+  </target>
+ 
+  <target name="clean">
+    <mkdir dir="${build.classes.dir}"/>
+    <!--<mkdir dir="${build.dist.dir}"/>-->
+
+    <delete>
+      <fileset dir="${build.classes.dir}" includes="**/*"/>
+      <!--<fileset dir="${build.dist.dir}" includes="**/*"/>-->
+    </delete>
+ 
+  </target>
+ 
+  <target name="compile" depends="clean">
+ 
+    <javac includeantruntime="false"
+      srcdir="${build.src.dir}"
+      destdir="${build.classes.dir}"
+      fork="yes"
+      executable="${JAVA_HOME}/bin/javac"
+      source="1.8"
+      debug="on">
+    </javac>
+  </target>
+ 
+</project>
