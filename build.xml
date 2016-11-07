@@ -3,7 +3,7 @@
 <project name="Flow solver" default="jar" basedir="."
   xmlns:fx="javafx:com.sun.javafx.tools.ant">
 
-  <property name="JAVA_HOME" value="/usr/local/java/jdk1.8.0_65"/>
+  <property name="JAVA_HOME" value="/usr/lib/jvm/java-8-jdk"/>
   <property name="build.src.dir" value="."/>
   <property name="build.classes.dir" value="build/classes"/>
   <property name="build.dist.dir" value="."/>
@@ -31,6 +31,8 @@
       <fileset dir="Assets/" />
     </fx:jar>
  
+
+
   </target>
  
   <target name="clean">
