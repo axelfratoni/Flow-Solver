@@ -306,13 +306,38 @@ public class AproxSolver extends Solver {
 	private void move(int posI, int posJ, Point dir){
 
 		board[posI][posJ].toMiddleOfTrace();
-		//board[posI][posJ].dir2 = Direction.
+		board[posI][posJ].dir2 = getDirection(dir);
 		board[posI + dir.y][posJ + dir.x].setColor(board[posI][posJ].getColor());
+		board[posI + dir.y][posJ + dir.x].dir1 = getOpDirection(dir);
+		board[posI + dir.y][posJ + dir.x].elem = Element.LINE;
 		
 		//veo si complete un trace
 		checkIsCompleteTrace(posI + dir.y, posJ + dir.x);
 	}
 	
+	private Direction getDirection(Point dir){
+		if(dir.x == 1 && dir.y == 0)
+			return Direction.RIGHT;
+		if(dir.x == -1 && dir.y == 0)
+			return Direction.LEFT;
+		if(dir.x == 0 && dir.y == 1)
+			return Direction.UP;
+		if(dir.x == 0 && dir.y == -1)
+			return Direction.DOWN;
+		return null;
+	}
+	
+	private Direction getOpDirection(Point dir){
+		if(dir.x == 1 && dir.y == 0)
+			return Direction.LEFT;
+		if(dir.x == -1 && dir.y == 0)
+			return Direction.RIGHT;
+		if(dir.x == 0 && dir.y == 1)
+			return Direction.DOWN;
+		if(dir.x == 0 && dir.y == -1)
+			return Direction.UP;
+		return null;
+	}
 	
 	private void checkIsCompleteTrace(int posI, int posJ){
 		
@@ -327,7 +352,9 @@ public class AproxSolver extends Solver {
 					
 					//le pongo a los dos que son complete trace
 					board[posI][posJ].toMiddleOfTrace();
+					board[posI][posJ].dir2 = getDirection(new Point(incJ, incI));
 					board[posI+incI][posJ+incJ].toMiddleOfTrace();
+					board[posI+incI][posJ+incJ].dir2 = getOpDirection(new Point(incJ, incI));
 					
 				}
 				
