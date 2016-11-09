@@ -15,6 +15,8 @@ public class Flow extends Application {
 	private static Mode mode;
 	private static int time = 0;
 	private static State initialState;
+	private static Solver solver;
+	private static int rows, cols;
 
 	public static void main(String[] args) {
 		launch(args);
@@ -35,9 +37,9 @@ public class Flow extends Application {
 			System.exit(1);
 		}
 		
-		Drawer drawer = new Drawer(primaryStage,initialState.getInfo());
-		Solver solver = new Solver(initialState, drawer);
-		solver.solve(mode, time);
+		Drawer drawer = new Drawer(primaryStage, rows, cols);
+		solver.setDrawer(drawer);
+		solver.solve(initialState, time);
 
 	}
 	
@@ -51,6 +53,7 @@ public class Flow extends Application {
 
 		if (args[1].equals("exact")) {
 			mode = Mode.EXACT;
+			solver = new ExactSolver();
 			if (args.length == 3) {
 				if (args[2].equals("progress")) {
 					mode = Mode.EXACT_PROGRESS;
@@ -70,6 +73,7 @@ public class Flow extends Application {
 				showUsage();
 				return 3;
 			}
+			solver = new AproxSolver();
 			try {
 				time = Integer.parseInt(args[2]);
 			} catch(NumberFormatException e) {
@@ -113,7 +117,6 @@ public class Flow extends Application {
 				return 3;
 			}
 			StringTokenizer st = new StringTokenizer(line, ",", false);
-			int rows = 0, cols = 0;
 			if (!st.hasMoreTokens()) {
 				System.err.println("Number of rows missing");
 				return 4;
@@ -144,7 +147,7 @@ public class Flow extends Application {
 
 			// Read board
 			
-			StateBuilder builder = new NewByteState.NewByteStateBuilder(rows, cols);
+			StateBuilder builder = new solver.getNewBuilder(rows, cols);
 			for (int i = 0; i < rows; i++) {
 				line = myReader.readLine();
 				if (line == null) {

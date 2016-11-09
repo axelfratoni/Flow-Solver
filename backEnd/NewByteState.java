@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
 
-public class NewByteState implements State {
+public class NewByteState implements ExactState {
 	
 	private static byte BINARY_UP = 0b00000001;
 	private static byte BINARY_RIGHT = 0b00000010;

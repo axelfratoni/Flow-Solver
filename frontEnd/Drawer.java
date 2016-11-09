@@ -13,8 +13,8 @@ public class Drawer  {
 	Pane board;
 	Canvas [][] canvasMatrix;
 	
-	public Drawer(Stage stage,Square[][] matrix){
-		canvasMatrix= new Canvas[matrix.length][matrix[0].length];
+	public Drawer(Stage stage, int i, int j) {
+		canvasMatrix= new Canvas[i][j];
 		this.stage=stage;
 		board= new Pane();
 		board.setPrefSize(Dimensions.BOARD_HEIGHT, Dimensions.BOARD_WIDTH);

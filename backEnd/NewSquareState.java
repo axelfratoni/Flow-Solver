@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-public class NewSquareState implements State {
+public class NewSquareState implements ExactState {
 	private Square[][] board;
 	private int incompletePaths;
 	private Map<Integer, Point> colors;
