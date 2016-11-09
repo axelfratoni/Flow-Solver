@@ -2,14 +2,14 @@ package backEnd;
 
 public class BestPathPossibleAlert extends Throwable {
 	
-	public State bestPathPossible;
+	public ExactState bestPathPossible;
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 	
-	public BestPathPossibleAlert(State bestPathPossible){ 
+	public BestPathPossibleAlert(ExactState bestPathPossible){ 
 		super();
 		this.bestPathPossible = bestPathPossible;
 	}

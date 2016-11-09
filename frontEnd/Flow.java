@@ -39,7 +39,9 @@ public class Flow extends Application {
 		
 		Drawer drawer = new Drawer(primaryStage, rows, cols);
 		solver.setDrawer(drawer);
-		solver.solve(initialState, time);
+		System.out.println("Llegó acá");
+		solver.solve(initialState, time, mode);
+		System.out.println("Llegó acá tambíén");
 
 	}
 	
@@ -147,7 +149,7 @@ public class Flow extends Application {
 
 			// Read board
 			
-			StateBuilder builder = new solver.getNewBuilder(rows, cols);
+			StateBuilder builder = solver.getNewBuilder(rows, cols);
 			for (int i = 0; i < rows; i++) {
 				line = myReader.readLine();
 				if (line == null) {

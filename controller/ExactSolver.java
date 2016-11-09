@@ -6,8 +6,6 @@ import java.util.*;
 
 public class ExactSolver extends Solver {
 
-	private Drawer drawer;
-
 	public ExactSolver() {
 	}
 
@@ -15,28 +13,28 @@ public class ExactSolver extends Solver {
 		return new NewByteState.NewByteStateBuilder(rows, cols);
 	}
 
-	public void solve(State initialState, int time) {
+	public void solve(State initialState, int time, Mode mode) {
 
-			if (! state instanceof ExactState) {
+			if (! (initialState instanceof ExactState)) {
 				throw new IllegalArgumentException("An ExactSolver must recieve an ExactState");
 			}
 
 			ExactState myExactState = (ExactState) initialState;
 
 			myExactState.printBoard();
-			Set<State> seenStates = new HashSet<>();
-			Deque<State> nextStates = new LinkedList<>();
+			Set<ExactState> seenStates = new HashSet<>();
+			Deque<ExactState> nextStates = new LinkedList<>();
 			seenStates.add(myExactState);
 			nextStates.offer(myExactState);
 			boolean foundSolution = false;
-			State solvedState = null;
+			ExactState solvedState = null;
 			int solution = -1;
 			long t = System.currentTimeMillis();
 			while(!nextStates.isEmpty() && !foundSolution) {
-				State thisState = nextStates.poll();
-				Set<State> thisNextStates = thisState.getNextStates();
+				ExactState thisState = nextStates.poll();
+				Set<ExactState> thisNextStates = thisState.getNextStates();
 				if (thisNextStates == null || thisNextStates.isEmpty()) continue;
-				for (State current: thisNextStates) {
+				for (ExactState current: thisNextStates) {
 					if (!foundSolution) {
 						int thisSolution = current.isSolution();
 						if (thisSolution != -1) {

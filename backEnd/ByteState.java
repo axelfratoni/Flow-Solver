@@ -33,8 +33,8 @@ public class ByteState implements ExactState {
 		hashCode = 0;
 	}
 
-	public Set<State> getNextStates() {
-		Set<State> result = new HashSet<>();
+	public Set<ExactState> getNextStates() {
+		Set<ExactState> result = new HashSet<>();
 		for (int i = 0; i < board.length; i++) {
 			for (int j = 0; j < board[0].length; j++) {
 				int lb = 0;
@@ -53,7 +53,7 @@ public class ByteState implements ExactState {
 		return result;
 	}
 
-	private boolean addNextStates(int x, int y, int i, int j, byte mask, byte opposite_mask, Set<State> result) {
+	private boolean addNextStates(int x, int y, int i, int j, byte mask, byte opposite_mask, Set<ExactState> result) {
 		boolean inRange = isInRange(x+i, y+j);
 		if (inRange && ((board[x][y] & 0x0F) == BINARY_DOT || (lowerBitsOn(board[x][y]) == 1 && ((board[x][y]^mask) & 0x0F) != 0))) {	// It's a non-connected dot or a non-maskwards line
 			boolean added = false;
@@ -326,7 +326,7 @@ public class ByteState implements ExactState {
 			}
 		}
 
-		public State build() {
+		public ExactState build() {
 			if (!isBoardValid(board)) {
 				throw new IllegalStateException();
 			}

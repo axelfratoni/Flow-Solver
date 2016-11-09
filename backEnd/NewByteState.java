@@ -41,19 +41,19 @@ public class NewByteState implements ExactState {
 		hashCode = 0;
 	}
 
-	public Set<State> getNextStates() {
-		Set<State> paths;
+	public Set<ExactState> getNextStates() {
+		Set<ExactState> paths;
 		try {
 			paths = getNextPathStates(board, (colors[index] >>> 24) & 0x000000FF, (colors[index] >>> 16) & 0x000000FF, emptySquares);
 		} catch (BestPathPossibleAlert e) {
-			paths =  new HashSet<State>();
+			paths =  new HashSet<ExactState>();
 			paths.add(e.bestPathPossible);
 			return paths;
 		}
 		return paths;
 	}
 
-	private Set<State> getNextPathStates(byte[][] board, int i, int j, int emptySpaces) throws BestPathPossibleAlert {
+	private Set<ExactState> getNextPathStates(byte[][] board, int i, int j, int emptySpaces) throws BestPathPossibleAlert {
 
 		// new NewByteState(board, inconexDots, emptySquares, colors, index).printBoard();
 
@@ -78,7 +78,7 @@ public class NewByteState implements ExactState {
 				possibleBlock = true;
 			}
 		}
-		Set<State> result = new HashSet<>();
+		Set<ExactState> result = new HashSet<>();
 		if (possibleBlock && hasBlockedPaths(board)) {
 			return result;
 		}
@@ -89,7 +89,7 @@ public class NewByteState implements ExactState {
 		return result;
 	}
 
-	private void getNextPathStatesDir(byte[][] board, int x, int y, int i, int j, int emptySpaces, byte mask, byte opposite_mask, Set<State> bag) throws BestPathPossibleAlert {
+	private void getNextPathStatesDir(byte[][] board, int x, int y, int i, int j, int emptySpaces, byte mask, byte opposite_mask, Set<ExactState> bag) throws BestPathPossibleAlert {
 		
 		if (isInRange(x+i, y+j)) {
 			if (board[x+i][y+j] == 0) {
@@ -413,7 +413,7 @@ public class NewByteState implements ExactState {
 			}
 		}
 
-		public State build() {
+		public ExactState build() {
 			if (!isBoardValid(board)) {
 				throw new IllegalStateException();
 			}

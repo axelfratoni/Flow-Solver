@@ -11,30 +11,24 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class HillClimbing {
+import frontEnd.*;
+import controller.*;
+
+public class AproxSolver extends Solver {
 	
 	private SquareHill[][] board;
-	private Set<Integer> colors;
 	private int boardWidth, boardHeight;
-	private Deque<Decision> previousDecisions;
-	private Set<Decision> DecisionsMade;
+	private Deque<AproxState> previousDecisions;
+	private Set<AproxState> decisionsMade;
 	
 	
-	public HillClimbing(int width, int height){
-		boardWidth = width;
-		boardHeight = height;
-		board = new SquareHill[width][height];
-		for(int i = 0; i < width; i++){
-			for(int j = 0; j < height; j++){
-				board[i][j] = new SquareHill();
-			}
-		}
-		colors = new HashSet<>();
-		previousDecisions = new LinkedList<Decision>();
-		DecisionsMade = new HashSet<Decision>();
+	public AproxSolver(){
+		
+		previousDecisions = new LinkedList<AproxState>();
+		decisionsMade = new HashSet<AproxState>();
 	}
 	
-	
+	/*
 	public void setDot(int color, int i, int j){
 		if(color != -1){
 			colors.add(color - '0');
@@ -42,9 +36,16 @@ public class HillClimbing {
 		board[i][j].setColor(color - '0');
 		
 	}
-	
+	*/
 
-	public void solve(){
+	public void solve(State initialState, int time, Mode mode) {
+		
+		
+		System.out.println("Entró a solve");
+		board = ((AproxState) initialState).board;
+		boardHeight = board.length;
+		boardWidth = board[0].length;
+		printBoard();
 		boolean movementDone = true;
 		while(movementDone){
 			solveImplicitSquares();
@@ -59,8 +60,15 @@ public class HillClimbing {
 				movementDone = true;
 			}
 		}
+		printBoard();
+		System.out.println("Salió de solve");
+		drawer.update(initialState.getInfo());
 	}
 	
+	public StateBuilder getNewBuilder(int rows, int cols) {
+		return new AproxState.AproxStateBuilder(rows, cols);
+	}
+
 	private boolean hasEOTs(){
 		for(int j = 0; j < boardWidth; j++){
 			for(int i = 0; i < boardHeight; i++){
@@ -109,42 +117,42 @@ public class HillClimbing {
 				//me muevo para arriba
 				if( isValidMovement(i, j-1) && checkIfCanConect( i, j-1, board[i][j].getColor()) && canMakeDecision(i, j, new Point(-1, 0))){
 					//System.out.println("Pos " + i + " " + j + " " + "dir " + -1 + " " + 0);
-					Decision Decision = new Decision(clone());
-					previousDecisions.offerFirst(Decision); // Guarda en el stack el estado del tablero antes de decidir
+					AproxState decision = new AproxState(clone());
+					previousDecisions.offerFirst(decision); // Guarda en el stack el estado del tablero antes de decidir
 					move(i, j, new Point(-1, 0));
-					Decision = new Decision(clone()); // Guarda en el set el estado del tablero despues de decidir
-					DecisionsMade.add(Decision);
+					decision = new AproxState(clone()); // Guarda en el set el estado del tablero despues de decidir
+					decisionsMade.add(decision);
 					movementDone = true;
 				}
 				//me muevo para la derecha
 				if( !movementDone && isValidMovement(i+1, j) && checkIfCanConect( i+1, j, board[i][j].getColor()) && canMakeDecision(i, j, new Point(0, 1))){
 					//System.out.println("Pos " + i + " " + j + " " + "dir " + 0 + " " + -1);
-					Decision Decision = new Decision(clone());
-					previousDecisions.offerFirst(Decision); // Guarda en el stack el estado del tablero antes de decidir
+					AproxState decision = new AproxState(clone());
+					previousDecisions.offerFirst(decision); // Guarda en el stack el estado del tablero antes de decidir
 					move(i, j, new Point(0, 1));
-					Decision = new Decision(clone()); // Guarda en el set el estado del tablero despues de decidir
-					DecisionsMade.add(Decision);
+					decision = new AproxState(clone()); // Guarda en el set el estado del tablero despues de decidir
+					decisionsMade.add(decision);
 					movementDone = true;
 
 				}
 				//me muevo para abajo
 				if( !movementDone && isValidMovement(i, j+1) && checkIfCanConect( i, j+1, board[i][j].getColor()) && canMakeDecision(i, j, new Point(1, 0))){
-					//System.out.println("Pos " + i + " " + j + " " + "dir " + 1 + " " + 0);
-					Decision Decision = new Decision(clone());
-					previousDecisions.offerFirst(Decision); // Guarda en el stack el estado del tablero antes de decidir
+					//System.out.println("Pos " + i + " " + j + " " + "dir " + 0 + " " + -1);
+					AproxState decision = new AproxState(clone());
+					previousDecisions.offerFirst(decision); // Guarda en el stack el estado del tablero antes de decidir
 					move(i, j, new Point(1, 0));
-					Decision = new Decision(clone()); // Guarda en el set el estado del tablero despues de decidir
-					DecisionsMade.add(Decision);
+					decision = new AproxState(clone()); // Guarda en el set el estado del tablero despues de decidir
+					decisionsMade.add(decision);
 					movementDone = true;
 				}
 				//me muevo para la izquierda
-				if( !movementDone && isValidMovement(i-1, j) && checkIfCanConect( i, j, board[i][j].getColor()) && canMakeDecision(i, j, new Point(0, -1))){
+				if( !movementDone && isValidMovement(i-1, j) && checkIfCanConect( i-1, j, board[i][j].getColor()) && canMakeDecision(i, j, new Point(0, -1))){
 					//System.out.println("Pos " + i + " " + j + " " + "dir " + 0 + " " + -1);
-					Decision Decision = new Decision(clone());
-					previousDecisions.offerFirst(Decision); // Guarda en el stack el estado del tablero antes de decidir
+					AproxState decision = new AproxState(clone());
+					previousDecisions.offerFirst(decision); // Guarda en el stack el estado del tablero antes de decidir
 					move(i, j, new Point(0, -1));
-					Decision = new Decision(clone()); // Guarda en el set el estado del tablero despues de decidir
-					DecisionsMade.add(Decision);
+					decision = new AproxState(clone()); // Guarda en el set el estado del tablero despues de decidir
+					decisionsMade.add(decision);
 					movementDone = true;
 				}
 			}
@@ -200,11 +208,11 @@ public class HillClimbing {
 			}
 			//System.out.println(" Color "+ board[bestEnd.position.y][bestEnd.position.x].getColor() + bestEnd);
 			
-			Decision Decision = new Decision(clone());
-			previousDecisions.offerFirst(Decision); // Guarda en el stack el estado del tablero antes de decidir
+			AproxState decision = new AproxState(clone());
+			previousDecisions.offerFirst(decision); // Guarda en el stack el estado del tablero antes de decidir
 			move(bestEnd.position.y, bestEnd.position.x, bestEnd.dir.get(bestEnd.bestDir));
-			Decision = new Decision(clone()); // Guarda en el set el estado del tablero despues de decidir
-			DecisionsMade.add(Decision);
+			decision = new AproxState(clone()); // Guarda en el set el estado del tablero despues de decidir
+			decisionsMade.add(decision);
 
 			return true;
 		}
@@ -216,7 +224,7 @@ public class HillClimbing {
 		if(!checkIfClogging(i, j, dir)){
 			SquareHill[][] aux = clone();
 			move(i, j, dir);
-			if(!DecisionsMade.contains(new Decision(board))){
+			if(!decisionsMade.contains(new AproxState(board))){
 				board = aux;
 				//System.out.println("true");
 				return true;
@@ -298,6 +306,7 @@ public class HillClimbing {
 	private void move(int posI, int posJ, Point dir){
 
 		board[posI][posJ].toMiddleOfTrace();
+		//board[posI][posJ].dir2 = Direction.
 		board[posI + dir.y][posJ + dir.x].setColor(board[posI][posJ].getColor());
 		
 		//veo si complete un trace
@@ -320,8 +329,6 @@ public class HillClimbing {
 					board[posI][posJ].toMiddleOfTrace();
 					board[posI+incI][posJ+incJ].toMiddleOfTrace();
 					
-					//borro el color de los posibles resteante
-					colors.remove(board[posI][posJ].getColor());
 				}
 				
 			}
@@ -468,16 +475,17 @@ public class HillClimbing {
 		 }
 	}
 	
-	private static class Decision{
+	private static class AproxState implements State {
 		SquareHill[][] board;
 		int hashCode;
 		
-		public Decision(SquareHill[][] board){
+		public AproxState(SquareHill[][] board){
 			this.board = board;
+			this.hashCode = 0;
 		}
 		
 		public int hashCode() {
-			if (this.hashCode != -1) {
+			if (this.hashCode != 0) {
 				return this.hashCode;
 			}
 			hashCode = 17;
@@ -486,13 +494,13 @@ public class HillClimbing {
 					hashCode = 37 * (37 * hashCode + i) + j;
 					if (board[i][j].getColor() != -1) {
 						hashCode = 37 * (37 * hashCode) + board[i][j].getColor();
-					}/*
+					}
 					if (board[i][j].dir1 != null) {
 						hashCode = 37 * hashCode + board[i][j].dir1.hashCode();
 					}
 					if (board[i][j].dir2 != null) {
 						hashCode = 37 * hashCode + board[i][j].dir2.hashCode();
-					}*/
+					}
 				}
 			}
 			return hashCode;
@@ -501,7 +509,7 @@ public class HillClimbing {
 		public boolean equals(Object o) {
 			if (this == o)
 				return true;
-			return (o instanceof Decision && hasSameBoard(((Decision) o).board));
+			return (o instanceof AproxState && hasSameBoard(((AproxState) o).board));
 		}
 
 		private boolean hasSameBoard(SquareHill[][] board2) {
@@ -515,8 +523,39 @@ public class HillClimbing {
 			}
 			return true;
 		}
+
+		public Square[][] getInfo() {
+			return board;
+		}
+	
+		public static class AproxStateBuilder implements StateBuilder {
+
+			SquareHill[][] board;
+
+			public AproxStateBuilder(int rows, int cols) {
+				board = new SquareHill[rows][cols];
+			}
+
+			public void setDot(int color, int row, int col) {
+
+				board[row][col] = new SquareHill();
+				board[row][col].elem = Element.DOT;
+				if (color == -1) {
+					board[row][col].elem = null;
+					board[row][col].color = color;	
+				} else {
+					board[row][col].color = color - '0';
+					board[row][col].setEndOfTrace();
+				}
+				board[row][col].dir1 = null;
+				board[row][col].dir2 = null;
+			}
+
+			public AproxState build() {
+				return new AproxState(board);
+			}
+		}
+
 	}
-	
-	
 	
 }

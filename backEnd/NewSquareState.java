@@ -35,20 +35,20 @@ public class NewSquareState implements ExactState {
 	}
 
 	@Override
-	public Set<State> getNextStates() {
-		Set<State> paths = new HashSet<State>();
+	public Set<ExactState> getNextStates() {
+		Set<ExactState> paths = new HashSet<>();
 		try {
 			paths.addAll(getFirstPathStates(colors.get(index).y, colors.get(index).x, board, emptySpaces));
 		} catch (BestPathPossibleAlert e) {
-			paths = new HashSet<State>();
+			paths = new HashSet<ExactState>();
 			paths.add(auxiliarState);
 		}
 		// System.out.println(paths);
 		return paths;
 	}
 
-	private Set<State> getFirstPathStates(int i, int j, Square[][] currentBoard, int eS) throws BestPathPossibleAlert {
-		Set<State> result = new HashSet<>();
+	private Set<ExactState> getFirstPathStates(int i, int j, Square[][] currentBoard, int eS) throws BestPathPossibleAlert {
+		Set<ExactState> result = new HashSet<>();
 		int iNtS = imNextToSomething(currentBoard, i, j);
 		if (iNtS != 0) {
 			NewSquareState nss = new NewSquareState(currentBoard, incompletePaths - 2, index + 1, eS, colors);
@@ -497,7 +497,7 @@ public class NewSquareState implements ExactState {
 			}
 		}
 
-		public State build() {
+		public ExactState build() {
 			if (!isBoardValid(board)) {
 				throw new IllegalStateException();
 			}

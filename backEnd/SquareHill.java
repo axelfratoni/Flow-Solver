@@ -1,8 +1,8 @@
 package backEnd;
 
-public class SquareHill {
+public class SquareHill extends Square {
 	
-	private int color;
+	
 	//private Square prev, next;
 	private boolean isEndOfTrace;
 	

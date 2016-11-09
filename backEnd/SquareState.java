@@ -247,12 +247,10 @@ public class SquareState implements State {
 		}
 	}
 
-	@Override
 	public int isSolution() {
 		return (incompletePaths > 0)? -1 : emptySpaces;
 	}
 
-	@Override
 	public Square[][] getInfo() {
 		return board;
 	}
