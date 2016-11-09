@@ -40,16 +40,17 @@ public class AproxSolver extends Solver {
 
 	public void solve(State initialState, int time, Mode mode) {
 		
-		
-		System.out.println("Entró a solve");
+		long runningTime = System.currentTimeMillis();
 		board = ((AproxState) initialState).board;
 		boardHeight = board.length;
 		boardWidth = board[0].length;
-		printBoard();
+	
 		boolean movementDone = true;
 		while(movementDone){
 			solveImplicitSquares();
 			
+
+
 			movementDone = solveNearSquares();
 			
 			if(!movementDone){
@@ -59,10 +60,10 @@ public class AproxSolver extends Solver {
 				board = previousDecisions.pollFirst().board;
 				movementDone = true;
 			}
+			
 		}
-		printBoard();
-		System.out.println("Salió de solve");
-		drawer.update(initialState.getInfo());
+		System.out.println("Time elapsed: " + (System.currentTimeMillis() - runningTime)/1000.0 + " seconds");
+		drawer.update(new AproxState(board).getInfo());
 	}
 	
 	public StateBuilder getNewBuilder(int rows, int cols) {
@@ -80,7 +81,6 @@ public class AproxSolver extends Solver {
 	}
 	
 	private void solveImplicitSquares(){
-		
 		boolean movementDone;
 		
 		do{
@@ -103,7 +103,7 @@ public class AproxSolver extends Solver {
 			if(movementDone){
 				//printBoard();
 			}
-		}while(movementDone);	
+		}while(movementDone);
 	}
 	/*
 		Modificar como toma de decicion
@@ -313,6 +313,7 @@ public class AproxSolver extends Solver {
 		
 		//veo si complete un trace
 		checkIsCompleteTrace(posI + dir.y, posJ + dir.x);
+
 	}
 	
 	private Direction getDirection(Point dir){
@@ -321,10 +322,11 @@ public class AproxSolver extends Solver {
 		if(dir.x == -1 && dir.y == 0)
 			return Direction.LEFT;
 		if(dir.x == 0 && dir.y == 1)
-			return Direction.UP;
-		if(dir.x == 0 && dir.y == -1)
 			return Direction.DOWN;
-		return null;
+		if(dir.x == 0 && dir.y == -1)
+			return Direction.UP;
+		throw new RuntimeException();
+		
 	}
 	
 	private Direction getOpDirection(Point dir){
@@ -333,10 +335,10 @@ public class AproxSolver extends Solver {
 		if(dir.x == -1 && dir.y == 0)
 			return Direction.RIGHT;
 		if(dir.x == 0 && dir.y == 1)
-			return Direction.DOWN;
-		if(dir.x == 0 && dir.y == -1)
 			return Direction.UP;
-		return null;
+		if(dir.x == 0 && dir.y == -1)
+			return Direction.DOWN;
+		throw new RuntimeException();
 	}
 	
 	private void checkIsCompleteTrace(int posI, int posJ){
@@ -443,6 +445,57 @@ public class AproxSolver extends Solver {
 		return miniBoard;
 	}
 	
+	public void printBoard() {
+		
+		System.out.println("Printing board:");
+		for (int i = 0; i < board.length; i++) {
+			for (int j = 0; j < board[0].length; j++) {
+				String s = new String();
+				if (board[i][j].elem == null) {
+					s += ("----");
+				} else {
+					switch (board[i][j].elem) {
+					case DOT:
+						s += (Integer.toString(board[i][j].color));
+						if (board[i][j].dir1 == null) {
+							s += "d  ";
+						} else {
+							s += ("d" + dirToString(board[i][j].dir1) + " ");
+						}
+						break;
+					case LINE:
+						s += (Integer.toString(board[i][j].color));
+						if (board[i][j].dir2 == null) {
+							s += (dirToString(board[i][j].dir1) + "  ");
+						} else {
+							s += (dirToString(board[i][j].dir1) + dirToString(board[i][j].dir2) + " ");
+						}
+						break;
+					}
+				}
+				System.out.print(s);
+			}
+			System.out.println();
+		}
+	}
+
+	private String dirToString(Direction dir) {
+		if (dir == null)
+			return "null";
+		switch (dir) {
+		case UP:
+			return "U";
+		case DOWN:
+			return "D";
+		case RIGHT:
+			return "R";
+		case LEFT:
+			return "L";
+		}
+		return null;
+	}
+
+	/*
 	public void printBoard(){
 		System.out.println();
 		for(int i = 0; i < boardWidth; i++){
@@ -457,7 +510,8 @@ public class AproxSolver extends Solver {
 			System.out.println();
 		}
 	}
-	
+	*/
+
 	public void printEOT(int i){
 		System.out.print("      ");
 		for(int j = 0; j < boardHeight; j++){

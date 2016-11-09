@@ -22,9 +22,20 @@ public class SquareHill extends Square {
 			this.isEndOfTrace = false;
 		}
 	}
+
+	public SquareHill(int color, boolean isEndOfTrace, Element elem, Direction dir1, Direction dir2){
+		this.color = color;
+		this.isEndOfTrace = isEndOfTrace;
+		if(color == -1){
+			this.isEndOfTrace = false;
+		}
+		this.dir1 = dir1;
+		this.dir2 = dir2;
+		this.elem = elem;
+	}
 	
 	public SquareHill clone(){
-		return new SquareHill(color, isEndOfTrace);
+		return new SquareHill(color, isEndOfTrace, elem, dir1, dir2);
 	}
 	
 	public void setColor(int color){

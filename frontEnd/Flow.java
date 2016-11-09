@@ -39,9 +39,7 @@ public class Flow extends Application {
 		
 		Drawer drawer = new Drawer(primaryStage, rows, cols);
 		solver.setDrawer(drawer);
-		System.out.println("Llegó acá");
 		solver.solve(initialState, time, mode);
-		System.out.println("Llegó acá tambíén");
 
 	}
 	
