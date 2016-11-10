@@ -40,31 +40,76 @@ public class AproxSolver extends Solver {
 
 	public void solve(State initialState, int time, Mode mode) {
 		
-		long runningTime = System.currentTimeMillis();
+		long startTime = System.currentTimeMillis();
+		AproxSolution bestSolution = null;
 		board = ((AproxState) initialState).board;
 		boardHeight = board.length;
 		boardWidth = board[0].length;
 	
-		boolean movementDone = true;
-		while(movementDone){
-			solveImplicitSquares();
-			
+		
+		boolean canKeepRunning = true;
+		while(canKeepRunning){
+			boolean movementDone = true;
+			while(movementDone && (((System.currentTimeMillis() - startTime)/1000L) < time)){
+				solveImplicitSquares();
 
-
-			movementDone = solveNearSquares();
-			
-			if(!movementDone){
-				movementDone = solveDecisions();
+				movementDone = solveNearSquares();
+				
+				if(!movementDone){
+					movementDone = solveDecisions();
+				}
+				if(!movementDone && hasEOTs() && !previousDecisions.isEmpty()){
+					board = previousDecisions.pollFirst().board;
+					movementDone = true;
+				}
+				
 			}
-			if(!movementDone && hasEOTs() && !previousDecisions.isEmpty()){
-				board = previousDecisions.pollFirst().board;
-				movementDone = true;
+			if(((System.currentTimeMillis() - startTime)/1000) > time || previousDecisions.isEmpty()){
+				canKeepRunning = false;
 			}
-			
+			else{
+				if(!hasEOTs()){
+					//printBoard();
+					completeCurve();
+					//printBoard();
+					int blanks = getBlanks();
+					if(bestSolution == null || bestSolution.blanks > blanks){
+						
+						bestSolution = new AproxSolution(new AproxState(board), ((System.currentTimeMillis() - startTime)/1000.0), blanks);
+					}
+					if(bestSolution != null && bestSolution.blanks == 0){
+						canKeepRunning = false;
+					}
+					else{
+						board = previousDecisions.pollFirst().board;
+					}
+				}	
+			}
 		}
-		System.out.println("Time elapsed: " + (System.currentTimeMillis() - runningTime)/1000.0 + " seconds");
-		drawer.update(new AproxState(board).getInfo());
+		if(bestSolution != null){
+			drawer.update((bestSolution.state).getInfo());
+			board = bestSolution.state.board;
+			printBoard();
+			System.out.println("Tardo " + bestSolution.time + " segundos en encontrar la solucion");
+			System.out.println("Quedaron " + bestSolution.blanks + " espacios vacios");
+		}else{
+			System.out.println("No se encontro solucion :(");
+		}
+
 	}
+
+	public int getBlanks(){
+		int count = 0;
+		for(int j = 0; j < boardWidth; j++){
+			for(int i = 0; i < boardHeight; i++){
+				if(board[i][j].getColor() == -1){
+					count++;
+				}
+			}
+		}
+		return count;
+	}
+
 	
 	public StateBuilder getNewBuilder(int rows, int cols) {
 		return new AproxState.AproxStateBuilder(rows, cols);
@@ -219,6 +264,131 @@ public class AproxSolver extends Solver {
 		return false;
 		
 	}
+
+	private void completeCurve(){
+		boolean movementDone;
+		do{
+			movementDone = false;
+			for(int i = 0; i < boardHeight; i++){
+				for(int j = 0; j < boardWidth; j++){
+					Direction dir = canMakeCurve(i, j);
+					if(dir != null){
+						moveCurve(i, j, dir);
+						movementDone = true;
+					}
+				}
+			}
+		}while(movementDone);	
+	}
+	
+	private void moveCurve(int i, int j, Direction dir){
+		Point inc, inc2, mov1, mov2;
+		Direction dirA, dirB;
+		if(dir == Direction.UP){
+			inc = new Point(0,1);
+			inc2 = new Point(1,0);
+			mov1 = new Point(0,-1);
+			mov2 = new Point(1,0);
+			dirA = Direction.RIGHT;
+			dirB = Direction.LEFT;
+		}
+		else if(dir == Direction.DOWN){
+			inc = new Point(0,-1);
+			inc2 = new Point(1,0);
+			mov1 = new Point(0,1);
+			mov2 = new Point(1,0);
+			dirA = Direction.RIGHT;
+			dirB = Direction.LEFT;
+		}
+		else if(dir == Direction.RIGHT){
+			inc = new Point(-1,0);
+			inc2 = new Point(0,1);
+			mov1 = new Point(1,0);
+			mov2 = new Point(0,1);
+			dirA = Direction.DOWN;
+			dirB = Direction.UP;
+		}
+		else{
+			inc = new Point(1,0);
+			inc2 = new Point(0,1);
+			mov1 = new Point(-1,0);
+			mov2 = new Point(0,1);
+			dirA = Direction.DOWN;
+			dirB = Direction.UP;
+		}
+		
+		board[i+inc.y][j+inc.x].setEndOfTrace();
+		if(board[i+inc.y][j+inc.x].dir2 == dirA){
+			board[i+inc.y][j+inc.x].dir2 = null;
+		}else{
+			board[i+inc.y][j+inc.x].dir1 = board[i+inc.y][j+inc.x].dir2;
+			board[i+inc.y][j+inc.x].dir2 = null;
+		}
+		board[i+inc.y+inc2.y][j+inc.x+inc2.x].setEndOfTrace();
+		if(board[i+inc.y+inc2.y][j+inc.x+inc2.x].dir2 == dirB){
+			board[i+inc.y+inc2.y][j+inc.x+inc2.x].dir2 = null;
+		}else{
+			board[i+inc.y+inc2.y][j+inc.x+inc2.x].dir1 = board[i+inc.y+inc2.y][j+inc.x+inc2.x].dir2;
+			board[i+inc.y+inc2.y][j+inc.x+inc2.x].dir2 = null;
+		}
+		move(i+inc.y, j+inc.x, mov1);
+		move(i, j, mov2);
+		
+	}
+	
+	private Direction canMakeCurve(int i, int j){
+		if(!isValidMovement(i, j))
+			return null;
+		
+		if(isValidMovement(i, j+1)){
+			if(isInRange(i-1, j) && isInRange(i-1, j+1)){
+				if(board[i-1][j].getColor() == board[i-1][j+1].getColor()){
+					if(board[i-1][j].dir1 == Direction.RIGHT || board[i-1][j].dir2 == Direction.RIGHT){
+						if(board[i-1][j+1].dir1 == Direction.LEFT || board[i-1][j+1].dir2 == Direction.LEFT){
+							return Direction.DOWN;//down
+						}
+					}
+				}
+			}
+			
+			if(isInRange(i+1, j) && isInRange(i+1, j+1)){
+				if(board[i+1][j].getColor() == board[i+1][j+1].getColor()){
+					if(board[i+1][j].dir1 == Direction.RIGHT || board[i+1][j].dir2 == Direction.RIGHT){
+						if(board[i+1][j+1].dir1 == Direction.LEFT || board[i+1][j+1].dir2 == Direction.LEFT){
+							return Direction.UP;//up
+						}
+					}
+				}
+			}
+			
+		}
+		
+		
+		if(isValidMovement(i+1, j)){
+			if(isInRange(i, j-1) && isInRange(i+1, j-1)){
+				if(board[i][j-1].getColor() == board[i+1][j-1].getColor()){
+					if(board[i][j-1].dir1 == Direction.DOWN || board[i][j-1].dir2 == Direction.DOWN){
+						if(board[i+1][j-1].dir1 == Direction.UP || board[i+1][j-1].dir2 == Direction.UP){
+							return Direction.RIGHT;
+						}
+					}
+				}
+			}
+			
+			if(isInRange(i, j+1) && isInRange(i+1, j+1)){
+				if(board[i][j+1].getColor() == board[i+1][j+1].getColor()){
+					if(board[i][j+1].dir1 == Direction.DOWN || board[i][j+1].dir2 == Direction.DOWN){
+						if(board[i+1][j+1].dir1 == Direction.UP || board[i+1][j+1].dir2 == Direction.UP){
+							return Direction.LEFT;
+						}
+					}
+				}
+			}
+			
+		}
+		return null;
+	}
+
 	
 	private boolean canMakeDecision(int i, int j, Point dir){
 		if(!checkIfClogging(i, j, dir)){
@@ -316,6 +486,18 @@ public class AproxSolver extends Solver {
 
 	}
 	
+	private Point getPoint(Direction dir){
+		if(dir == Direction.UP)
+			return new Point(0,-1);
+		if(dir == Direction.DOWN)
+			return new Point(0,1);
+		if(dir == Direction.RIGHT)
+			return new Point(1,0);
+		if(dir == Direction.LEFT)
+			return new Point(-1,0);
+		throw new RuntimeException();
+	}
+
 	private Direction getDirection(Point dir){
 		if(dir.x == 1 && dir.y == 0)
 			return Direction.RIGHT;
@@ -554,6 +736,18 @@ public class AproxSolver extends Solver {
 		 public String toString(){
 			 return " Position: " + position + " Direction: " + dir + " Best: " + bestDir;
 		 }
+	}
+
+	private static class AproxSolution{
+		AproxState state;
+		int blanks;
+		double time;
+
+		public AproxSolution(AproxState state, double time, int blanks){
+			this.state = state;
+			this.time = time;
+			this.blanks = blanks;
+		}
 	}
 	
 	private static class AproxState implements State {
