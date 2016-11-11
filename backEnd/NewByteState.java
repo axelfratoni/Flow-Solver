@@ -55,18 +55,9 @@ public class NewByteState implements ExactState {
 
 	private Set<ExactState> getNextPathStates(byte[][] board, int i, int j, int emptySpaces) throws BestPathPossibleAlert {
 
-		// new NewByteState(board, inconexDots, emptySquares, colors, index).printBoard();
-
 		boolean possibleBlock = false;
 		if ((board[i][j] & 0x0F) != BINARY_DOT) {
-			if (((board[i][j] & 0x0F) == BINARY_DOWN && (i == 0 || lowerBitsOn(board[i-1][j]) != 0)) || ((board[i][j] & 0x0F) == BINARY_UP && (i == board.length-1 || lowerBitsOn(board[i+1][j]) != 0)) || ((board[i][j] & 0x0F) == BINARY_RIGHT && (j == 0 || lowerBitsOn(board[i][j-1]) != 0)) || ((board[i][j] & 0x0F) == BINARY_LEFT && (j == board[0].length-1 || lowerBitsOn(board[i][j+1]) != 0))) {	// If I'm facnig a border or a filled square
-				
-				// System.out.println("Not empty in front: ");
-				// if ((board[i][j] & 0x0F) == BINARY_UP) System.out.println("UP");
-				// if ((board[i][j] & 0x0F) == BINARY_DOWN) System.out.println("DOWN");
-				// if ((board[i][j] & 0x0F) == BINARY_LEFT) System.out.println("LEFT");
-				// if ((board[i][j] & 0x0F) == BINARY_RIGHT) System.out.println("RIGHT");
-				
+			if (((board[i][j] & 0x0F) == BINARY_DOWN && (i == 0 || lowerBitsOn(board[i-1][j]) != 0)) || ((board[i][j] & 0x0F) == BINARY_UP && (i == board.length-1 || lowerBitsOn(board[i+1][j]) != 0)) || ((board[i][j] & 0x0F) == BINARY_RIGHT && (j == 0 || lowerBitsOn(board[i][j-1]) != 0)) || ((board[i][j] & 0x0F) == BINARY_LEFT && (j == board[0].length-1 || lowerBitsOn(board[i][j+1]) != 0))) {	// If I'm facnig a border or a filled square				
 				possibleBlock = true;
 			} else if (i != 0 && (board[i-1][j] & 0x0F) == BINARY_DOT) {	// There's a dot upwards
 				possibleBlock = true;
@@ -112,27 +103,14 @@ public class NewByteState implements ExactState {
 	}
 
 	private boolean hasBlockedPaths(byte[][] board) {
-		// System.out.println("Looking for blocked paths...");
 		for (int i = index + 1; i < colors.length; i++) {
 			if (colors[i] == 0) continue;
 				byte[][] colorBoard = newColorBoard(board, i);
-				// printColorBoard(colorBoard);
 				if (!thereIsAPath(colorBoard, (colors[i] >>> 24) & 0xFF, (colors[i] >>> 16) & 0xFF)) {
 					return true;
 				}
-				// System.out.println("Color " + i + " is reachable");
 		}
 		return false;
-	}
-
-	private void printColorBoard(byte[][] colorBoard) {
-		for (int i = 0; i < colorBoard.length; i++) {
-			for (int j = 0; j < colorBoard[0].length; j++) {
-				System.out.print(colorBoard[i][j]);
-			}
-			System.out.println();
-		}
-		System.out.println();
 	}
 
 	private boolean thereIsAPath(byte[][] colorBoard, int i, int j) {
@@ -180,7 +158,6 @@ public class NewByteState implements ExactState {
 			}
 		}
 		
-		//colorBoard[(colors[k] >>> 24) & 0xFF][(colors[k] >>> 16) & 0xFF] = 2;
 		colorBoard[(colors[k] >>> 8) & 0xFF][colors[k] & 0xFF] = 3;	// 3 for destination
 		return colorBoard;
 	}

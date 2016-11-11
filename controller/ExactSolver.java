@@ -10,7 +10,7 @@ public class ExactSolver extends Solver {
 	}
 
 	public StateBuilder getNewBuilder(int rows, int cols) {
-		return new NewByteState.NewByteStateBuilder(rows, cols);
+		return new NewSquareState.NewSquareStateBuilder(rows, cols);
 	}
 
 	public void solve(State initialState, int time, Mode mode) {
@@ -44,12 +44,10 @@ public class ExactSolver extends Solver {
 							if (thisSolution == 0) {
 								foundSolution = true;
 							}
-							// current.printBoard();
 						} else {
 							if (!seenStates.contains(current)) {
 								nextStates.offer(current);
 								seenStates.add(current);
-								// current.printBoard();
 							}
 						}
 					}
@@ -57,7 +55,7 @@ public class ExactSolver extends Solver {
 						try {
 							Thread.currentThread().sleep(100);
 						} catch (InterruptedException e) {
-							System.err.println("What you wake me up for, biatch?");
+							// There's nothing I can do about it...
 						}
 						current.printBoard();
 					}
@@ -67,6 +65,7 @@ public class ExactSolver extends Solver {
 				}
 			}
 			if (solvedState != null) {
+				solvedState.printBoard();
 				drawer.update(solvedState.getInfo());
 			} else {
 				System.out.println("No solution found");

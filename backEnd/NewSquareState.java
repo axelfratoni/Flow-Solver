@@ -43,12 +43,13 @@ public class NewSquareState implements ExactState {
 			paths = new HashSet<ExactState>();
 			paths.add(auxiliarState);
 		}
-		// System.out.println(paths);
+		
 		return paths;
 	}
 
 	private Set<ExactState> getFirstPathStates(int i, int j, Square[][] currentBoard, int eS) throws BestPathPossibleAlert {
 		Set<ExactState> result = new HashSet<>();
+		
 		int iNtS = imNextToSomething(currentBoard, i, j);
 		if (iNtS != 0) {
 			NewSquareState nss = new NewSquareState(currentBoard, incompletePaths - 2, index + 1, eS, colors);
@@ -56,6 +57,7 @@ public class NewSquareState implements ExactState {
 				return result;
 			}
 		}
+		
 		int c = connects(i, j, currentBoard);
 		if (c != 0) {
 			Square[][] newBoard = copyBoard(currentBoard);
@@ -84,9 +86,11 @@ public class NewSquareState implements ExactState {
 				this.auxiliarState = nss;
 				throw new BestPathPossibleAlert(nss);
 			}
+			
 			if (!hasOtherPaths(newBoard, c, i, j)) {
 				return result;
 			}
+			
 		}
 
 		if (isInRange(i + 1, j) && currentBoard[i + 1][j].elem == null) {
@@ -241,15 +245,6 @@ public class NewSquareState implements ExactState {
 		return miniBoard;
 	}
 
-	// private void printMiniBoard(byte[][] miniBoard) {
-	// for(int i = 0; i < board.length ; i++){
-	// for(int j = 0; j < board[0].length; j++){
-	// System.out.print(miniBoard[i][j]);
-	// }
-	// System.out.println();
-	// }
-	// }
-
 	private boolean checkIfThereIsAPath(byte[][] miniBoard, int i, int j, boolean isTheFirstCall) {
 		if (miniBoard[i][j] == 0) {
 			return false;
@@ -364,54 +359,48 @@ public class NewSquareState implements ExactState {
 		return hashCode;
 	}
 
-	/*
-	 * public int hashCode(){ if(this.hashCode != -1){ return this.hashCode; }
-	 * int hash = 0; for(int i = 0; i < board.length ; i++){ for(int j = 0; j <
-	 * board[0].length; j++){ if(board[i][j].elem == null){ hash+=2; } else {
-	 * switch(board[i][j].elem){ case DOT: if(board[i][j].dir1 == null){ hash +=
-	 * 3; } else { hash += 5; } break; case LINE: if(board[i][j].dir2 == null){
-	 * hash+= 7; } else { hash+= 11; } break; } } } } this.hashCode = hash;
-	 * return hash; }
-	 */
-
-	public String toString() {
-		printBoard();
-		return " ";
-	}
-
 	public void printBoard() {
-		System.out.println(
-				"EmptySpaces: - " + " IncompletePaths: " + incompletePaths / 2 + " isSolution: " + isSolution());
-		System.out.println("Printing board:");
+			
 		for (int i = 0; i < board.length; i++) {
 			for (int j = 0; j < board[0].length; j++) {
-				String s = new String();
 				if (board[i][j].elem == null) {
-					s += ("----");
+					System.out.print(" ");
+				} else if (board[i][j].elem == DOT) {
+					System.out.print(board[i][j].color);
+				} else if (board[i][j].dir2 == null) {
+					switch(board[i][j].dir1) {
+						case UP:
+							System.out.print("'");
+							break;
+						case DOWN:
+							System.out.print(",");
+							break;
+						case LEFT:
+							System.out.print(">");
+							break;
+						case RIGHT:
+							System.out.print("<");
+							break;
+					}
 				} else {
-					switch (board[i][j].elem) {
-					case DOT:
-						s += (Integer.toString(board[i][j].color));
-						if (board[i][j].dir1 == null) {
-							s += "d  ";
-						} else {
-							s += ("d" + dirToString(board[i][j].dir1) + " ");
-						}
-						break;
-					case LINE:
-						s += (Integer.toString(board[i][j].color));
-						if (board[i][j].dir2 == null) {
-							s += (dirToString(board[i][j].dir1) + "  ");
-						} else {
-							s += (dirToString(board[i][j].dir1) + dirToString(board[i][j].dir2) + " ");
-						}
-						break;
+					if ((board[i][j].dir1 == UP && board[i][j].dir2 == DOWN) || (board[i][j].dir2 == UP && board[i][j].dir1 == DOWN)) {
+						System.out.print("|");
+					} else if ((board[i][j].dir1 == LEFT && board[i][j].dir2 == RIGHT) || (board[i][j].dir2 == LEFT && board[i][j].dir1 == RIGHT)) {
+						System.out.print("—");
+					} else if ((board[i][j].dir1 == UP && board[i][j].dir2 == RIGHT) || (board[i][j].dir2 == UP && board[i][j].dir1 == RIGHT)) {
+						System.out.print("└");
+					} else if ((board[i][j].dir1 == DOWN && board[i][j].dir2 == RIGHT) || (board[i][j].dir2 == DOWN && board[i][j].dir1 == RIGHT)) {
+						System.out.print("┌");
+					} else if ((board[i][j].dir1 == DOWN && board[i][j].dir2 == LEFT) || (board[i][j].dir2 == DOWN && board[i][j].dir1 == LEFT)) {
+						System.out.print("┐");
+					} else if ((board[i][j].dir1 == UP && board[i][j].dir2 == LEFT) || (board[i][j].dir2 == UP && board[i][j].dir1 == LEFT)) {
+						System.out.print("┘");
 					}
 				}
-				System.out.print(s);
 			}
 			System.out.println();
 		}
+		System.out.println();
 	}
 
 	private String dirToString(Direction dir) {
