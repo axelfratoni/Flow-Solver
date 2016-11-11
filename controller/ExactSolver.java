@@ -10,7 +10,7 @@ public class ExactSolver extends Solver {
 	}
 
 	public StateBuilder getNewBuilder(int rows, int cols) {
-		return new NewSquareState.NewSquareStateBuilder(rows, cols);
+		return new NewByteState.NewByteStateBuilder(rows, cols);
 	}
 
 	public void solve(State initialState, int time, Mode mode) {

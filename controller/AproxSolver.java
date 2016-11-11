@@ -11,6 +11,9 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 
+import static backEnd.Element.*;
+import static backEnd.Direction.*;
+
 import frontEnd.*;
 import backEnd.*;
 
@@ -41,7 +44,7 @@ public class AproxSolver extends Solver {
 			hasToStop = true;
 		}
 	
-		
+		printBoard();
 		boolean canKeepRunning = true;
 		while(canKeepRunning){
 			boolean movementDone = true;
@@ -91,10 +94,10 @@ public class AproxSolver extends Solver {
 			drawer.update((bestSolution.state).getInfo());
 			board = bestSolution.state.getBoard();
 			printBoard();
-			System.out.println("Tardo " + bestSolution.time + " segundos en encontrar la solucion");
-			System.out.println("Quedaron " + bestSolution.blanks + " espacios vacios");
+			System.out.println("Time elapsed for best solution: " + bestSolution.time);
+			System.out.println("Empty spaces left: " + bestSolution.blanks);
 		}else{
-			System.out.println("No se encontro solucion :(");
+			System.out.println("No solution found");
 		}
 
 	}
@@ -625,37 +628,47 @@ public class AproxSolver extends Solver {
 	}
 	
 	public void printBoard() {
-		
-		System.out.println("Printing board:");
+			
 		for (int i = 0; i < board.length; i++) {
 			for (int j = 0; j < board[0].length; j++) {
-				String s = new String();
 				if (board[i][j].elem == null) {
-					s += ("----");
+					System.out.print(" ");
+				} else if (board[i][j].elem == DOT) {
+					System.out.print(board[i][j].color);
+				} else if (board[i][j].dir2 == null) {
+					switch(board[i][j].dir1) {
+						case UP:
+							System.out.print("'");
+							break;
+						case DOWN:
+							System.out.print(",");
+							break;
+						case LEFT:
+							System.out.print(">");
+							break;
+						case RIGHT:
+							System.out.print("<");
+							break;
+					}
 				} else {
-					switch (board[i][j].elem) {
-					case DOT:
-						s += (Integer.toString(board[i][j].color));
-						if (board[i][j].dir1 == null) {
-							s += "d  ";
-						} else {
-							s += ("d" + dirToString(board[i][j].dir1) + " ");
-						}
-						break;
-					case LINE:
-						s += (Integer.toString(board[i][j].color));
-						if (board[i][j].dir2 == null) {
-							s += (dirToString(board[i][j].dir1) + "  ");
-						} else {
-							s += (dirToString(board[i][j].dir1) + dirToString(board[i][j].dir2) + " ");
-						}
-						break;
+					if ((board[i][j].dir1 == UP && board[i][j].dir2 == DOWN) || (board[i][j].dir2 == UP && board[i][j].dir1 == DOWN)) {
+						System.out.print("|");
+					} else if ((board[i][j].dir1 == LEFT && board[i][j].dir2 == RIGHT) || (board[i][j].dir2 == LEFT && board[i][j].dir1 == RIGHT)) {
+						System.out.print("—");
+					} else if ((board[i][j].dir1 == UP && board[i][j].dir2 == RIGHT) || (board[i][j].dir2 == UP && board[i][j].dir1 == RIGHT)) {
+						System.out.print("└");
+					} else if ((board[i][j].dir1 == DOWN && board[i][j].dir2 == RIGHT) || (board[i][j].dir2 == DOWN && board[i][j].dir1 == RIGHT)) {
+						System.out.print("┌");
+					} else if ((board[i][j].dir1 == DOWN && board[i][j].dir2 == LEFT) || (board[i][j].dir2 == DOWN && board[i][j].dir1 == LEFT)) {
+						System.out.print("┐");
+					} else if ((board[i][j].dir1 == UP && board[i][j].dir2 == LEFT) || (board[i][j].dir2 == UP && board[i][j].dir1 == LEFT)) {
+						System.out.print("┘");
 					}
 				}
-				System.out.print(s);
 			}
 			System.out.println();
 		}
+		System.out.println();
 	}
 
 	private String dirToString(Direction dir) {
