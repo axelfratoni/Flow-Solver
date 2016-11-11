@@ -73,9 +73,7 @@ public class AproxSolver extends Solver {
 			}
 			else{
 				if(!hasEOTs()){
-					//printBoard();
 					completeCurve();
-					//printBoard();
 					int blanks = getBlanks();
 					if(bestSolution == null || bestSolution.blanks > blanks){
 						
@@ -473,7 +471,12 @@ public class AproxSolver extends Solver {
 	private void move(int posI, int posJ, Point dir){
 
 		board[posI][posJ].toMiddleOfTrace();
-		board[posI][posJ].dir2 = getDirection(dir);
+		if(board[posI][posJ].elem == Element.DOT){
+			board[posI][posJ].dir1 = getDirection(dir);
+		}else{
+			board[posI][posJ].dir2 = getDirection(dir);
+		}
+		
 		board[posI + dir.y][posJ + dir.x].setColor(board[posI][posJ].getColor());
 		board[posI + dir.y][posJ + dir.x].dir1 = getOpDirection(dir);
 		board[posI + dir.y][posJ + dir.x].elem = Element.LINE;
@@ -527,13 +530,11 @@ public class AproxSolver extends Solver {
 	}
 	
 	private void checkIsCompleteTrace(int posI, int posJ){
-		
 		for(int incI = -1; incI <= 1; incI ++){
 			for(int incJ = -1; incJ <= 1; incJ ++){
 				if(incI == 0 && incJ == 0 || !(incI != 0 && incJ == 0 || incJ != 0 && incI == 0) ){
 					continue;
 				}
-				
 				//si esta en rango, es endOfTrace, y es del mismo color entonces es un complteTrace
 				if( isInRange(posI+incI, posJ+incJ) && board[posI+incI][posJ+incJ].isEndOfTrace() && board[posI+incI][posJ+incJ].getColor() == board[posI][posJ].getColor() ){
 					
@@ -541,8 +542,12 @@ public class AproxSolver extends Solver {
 					board[posI][posJ].toMiddleOfTrace();
 					board[posI][posJ].dir2 = getDirection(new Point(incJ, incI));
 					board[posI+incI][posJ+incJ].toMiddleOfTrace();
-					board[posI+incI][posJ+incJ].dir2 = getOpDirection(new Point(incJ, incI));
-					
+					if(board[posI+incI][posJ+incJ].elem == Element.DOT || board[posI+incI][posJ+incJ].dir1 == null){
+						board[posI+incI][posJ+incJ].dir1 = getOpDirection(new Point(incJ, incI));
+					}else{
+						board[posI+incI][posJ+incJ].dir2 = getOpDirection(new Point(incJ, incI));
+					}
+					return;
 				}
 				
 			}
